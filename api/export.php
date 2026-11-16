@@ -72,15 +72,6 @@ if ($pdo) {
     }
 }
 
-// Check offline backup store if DB returned empty
-if (empty($entries)) {
-    $backupFile = __DIR__ . '/../data/entries_backup.json';
-    if (file_exists($backupFile)) {
-        $raw = file_get_contents($backupFile);
-        $entries = json_decode($raw, true) ?: [];
-    }
-}
-
 // JSON Output Format
 if ($format === 'json') {
     header('Content-Type: application/json; charset=utf-8');

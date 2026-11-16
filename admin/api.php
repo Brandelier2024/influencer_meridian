@@ -3,7 +3,9 @@
  * Meridian Ice Cream Brand Ambassador Contest
  * Secure Superadmin Control API Endpoint
  * 
- * Security features:
+ * Security & Data Invariants:
+ * - Direct database operations only (No JSON backup failsafe overwriting deleted entries)
+ * - Single source of truth: SQL database table `meridian_contest_entries`
  * - Session-based authentication with HttpOnly and SameSite cookies
  * - Anti-brute-force rate limiting on login (5 failed attempts / 5 mins)
  * - Strict CSRF verification on all state-mutating POST requests
@@ -128,7 +130,7 @@ if ($action === 'login') {
     // Record failed attempt
     recordFailedLogin($clientIp);
 
-    // Minor delay to mitigate timing attacks
+    // Delay to mitigate timing attacks
     usleep(250000); // 250ms
 
     http_response_code(401);
@@ -189,29 +191,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SESSION['meridian_admin'])
 
 $pdo = getDbConnection();
 
-// Auto-upgrade enum in DB if needed to include 'rejected'
-if ($pdo) {
-    try {
-        $pdo->exec("ALTER TABLE `meridian_contest_entries` MODIFY COLUMN `status` ENUM('registered', 'under_review', 'shortlisted', 'winner', 'rejected') NOT NULL DEFAULT 'registered'");
-    } catch (Exception $e) {
-        // Ignored if already up to date
-    }
-}
-
 // -------------------------------------------------------------
-// ACTION: GET STATS
+// ACTION: GET STATS (From Live Database)
 // -------------------------------------------------------------
 if ($action === 'get_stats') {
     $stats = [
-        'total'         => 0,
-        'today'         => 0,
-        'shortlisted'   => 0,
-        'winners'       => 0,
-        'categories'    => ['male' => 0, 'female' => 0, 'child' => 0, 'group' => 0],
-        'statuses'      => ['registered' => 0, 'under_review' => 0, 'shortlisted' => 0, 'winner' => 0, 'rejected' => 0],
-        'cities'        => [],
-        'backup_count'  => 0,
-        'db_connected'  => ($pdo !== null)
+        'total'           => 0,
+        'today'           => 0,
+        'shortlisted'     => 0,
+        'winners'         => 0,
+        'categories'      => ['male' => 0, 'female' => 0, 'child' => 0, 'group' => 0],
+        'statuses'        => ['registered' => 0, 'under_review' => 0, 'shortlisted' => 0, 'winner' => 0, 'rejected' => 0],
+        'cities'          => [],
+        'active_parlours' => 0,
+        'db_driver'       => ($pdo ? $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) : 'disconnected')
     ];
 
     if ($pdo) {
@@ -237,27 +230,17 @@ if ($action === 'get_stats') {
                 }
             }
 
-            $stmt = $pdo->query("SELECT COUNT(*) as cnt FROM meridian_contest_entries WHERE DATE(created_at) = CURDATE()");
+            $stmt = $pdo->query("SELECT COUNT(*) as cnt FROM meridian_contest_entries WHERE DATE(created_at) = CURRENT_DATE");
             $stats['today'] = (int)($stmt->fetch()['cnt'] ?? 0);
 
             $stmt = $pdo->query("SELECT city, COUNT(*) as cnt FROM meridian_contest_entries GROUP BY city ORDER BY cnt DESC LIMIT 10");
             $stats['cities'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+            $stmt = $pdo->query("SELECT COUNT(DISTINCT store_code) as cnt FROM meridian_contest_entries WHERE store_code != 'GENERAL'");
+            $stats['active_parlours'] = (int)($stmt->fetch()['cnt'] ?? 0);
+
         } catch (PDOException $e) {
             error_log("Stats query error: " . $e->getMessage());
-        }
-    }
-
-    $backupFile = __DIR__ . '/../data/entries_backup.json';
-    if (file_exists($backupFile)) {
-        $backupEntries = json_decode(file_get_contents($backupFile), true) ?: [];
-        $stats['backup_count'] = count($backupEntries);
-        if ($stats['total'] === 0) {
-            $stats['total'] = count($backupEntries);
-            foreach ($backupEntries as $be) {
-                $c = $be['category'] ?? 'male';
-                if (isset($stats['categories'][$c])) $stats['categories'][$c]++;
-            }
         }
     }
 
@@ -266,7 +249,7 @@ if ($action === 'get_stats') {
 }
 
 // -------------------------------------------------------------
-// ACTION: GET ENTRIES (Filterable & Paginated)
+// ACTION: GET ENTRIES (Filterable & Paginated, Database Only)
 // -------------------------------------------------------------
 if ($action === 'get_entries') {
     $page = max(1, (int)($_GET['page'] ?? 1));
@@ -334,39 +317,13 @@ if ($action === 'get_entries') {
         }
     }
 
-    // Fallback if DB empty/offline
-    if (empty($entries) && $total === 0) {
-        $backupFile = __DIR__ . '/../data/entries_backup.json';
-        if (file_exists($backupFile)) {
-            $raw = json_decode(file_get_contents($backupFile), true) ?: [];
-            $filtered = [];
-            foreach ($raw as $idx => $r) {
-                $r['id'] = $idx + 1;
-                $r['status'] = $r['status'] ?? 'registered';
-                $r['video_url'] = $r['video_url'] ?? '';
-                $r['store_code'] = $r['store_code'] ?? 'GENERAL';
-                $r['instagram_handle'] = $r['instagram_handle'] ?? '';
-                
-                if (!empty($search)) {
-                    $haystack = strtolower(($r['full_name'] ?? '') . ' ' . ($r['entry_code'] ?? '') . ' ' . ($r['mobile_number'] ?? ''));
-                    if (strpos($haystack, strtolower($search)) === false) continue;
-                }
-                if (!empty($category) && ($r['category'] ?? '') !== $category) continue;
-                if (!empty($status) && ($r['status'] ?? 'registered') !== $status) continue;
-                $filtered[] = $r;
-            }
-            $total = count($filtered);
-            $entries = array_slice($filtered, $offset, $limit);
-        }
-    }
-
     echo json_encode([
         'success'     => true,
         'entries'     => $entries,
         'total'       => $total,
         'page'        => $page,
         'limit'       => $limit,
-        'total_pages' => ceil($total / $limit)
+        'total_pages' => ($total > 0 ? ceil($total / $limit) : 1)
     ]);
     exit;
 }
@@ -453,7 +410,6 @@ if ($action === 'update_entry') {
         exit;
     }
 
-    // Validate URL scheme if provided
     if (!empty($videoUrl)) {
         $scheme = parse_url($videoUrl, PHP_URL_SCHEME);
         if (!in_array(strtolower((string)$scheme), ['http', 'https'], true) || !filter_var($videoUrl, FILTER_VALIDATE_URL)) {
@@ -489,7 +445,7 @@ if ($action === 'update_entry') {
 }
 
 // -------------------------------------------------------------
-// ACTION: DELETE ENTRY
+// ACTION: DELETE ENTRY (Direct Database Deletion)
 // -------------------------------------------------------------
 if ($action === 'delete_entry') {
     $raw = file_get_contents('php://input');
@@ -505,7 +461,7 @@ if ($action === 'delete_entry') {
     $stmt = $pdo->prepare("DELETE FROM meridian_contest_entries WHERE id = :id");
     $stmt->execute([':id' => $id]);
 
-    echo json_encode(['success' => true, 'message' => "Entry #{$id} deleted successfully."]);
+    echo json_encode(['success' => true, 'message' => "Entry #{$id} permanently deleted from database."]);
     exit;
 }
 
@@ -531,7 +487,7 @@ if ($action === 'bulk_action') {
     if ($subAction === 'delete') {
         $stmt = $pdo->prepare("DELETE FROM meridian_contest_entries WHERE id IN ($placeholders)");
         $stmt->execute($intIds);
-        echo json_encode(['success' => true, 'message' => count($intIds) . ' entries deleted successfully.']);
+        echo json_encode(['success' => true, 'message' => count($intIds) . ' entries permanently deleted from database.']);
         exit;
     }
 
@@ -625,61 +581,6 @@ if ($action === 'create_entry') {
 }
 
 // -------------------------------------------------------------
-// ACTION: SYNC BACKUP FILE INTO DATABASE
-// -------------------------------------------------------------
-if ($action === 'sync_backup') {
-    if (!$pdo) {
-        http_response_code(500);
-        echo json_encode(['success' => false, 'message' => 'Database not connected']);
-        exit;
-    }
-
-    $backupFile = __DIR__ . '/../data/entries_backup.json';
-    if (!file_exists($backupFile)) {
-        echo json_encode(['success' => true, 'message' => 'No backup file found to sync.', 'synced' => 0]);
-        exit;
-    }
-
-    $entries = json_decode(file_get_contents($backupFile), true) ?: [];
-    $synced = 0;
-
-    $stmtCheck = $pdo->prepare("SELECT id FROM meridian_contest_entries WHERE entry_code = :code");
-    $stmtInsert = $pdo->prepare("
-        INSERT INTO meridian_contest_entries 
-        (entry_code, full_name, mobile_number, email_address, category, city, store_code, created_at, status, terms_agreed)
-        VALUES 
-        (:code, :name, :mobile, :email, :category, :city, :store, :created, 'registered', 1)
-    ");
-
-    foreach ($entries as $e) {
-        $code = $e['entry_code'] ?? '';
-        if (empty($code)) continue;
-
-        $stmtCheck->execute([':code' => $code]);
-        if (!$stmtCheck->fetch()) {
-            $stmtInsert->execute([
-                ':code'     => $code,
-                ':name'     => $e['full_name'] ?? 'Contestant',
-                ':mobile'   => $e['mobile_number'] ?? '',
-                ':email'    => $e['email_address'] ?? '',
-                ':category' => $e['category'] ?? 'male',
-                ':city'     => $e['city'] ?? 'pune',
-                ':store'    => $e['store_code'] ?? 'GENERAL',
-                ':created'  => $e['created_at'] ?? date('Y-m-d H:i:s')
-            ]);
-            $synced++;
-        }
-    }
-
-    echo json_encode([
-        'success' => true,
-        'message' => "Successfully imported {$synced} new entries from backup store into MySQL.",
-        'synced'  => $synced
-    ]);
-    exit;
-}
-
-// -------------------------------------------------------------
 // ACTION: EXPORT CSV (Authenticated via Session)
 // -------------------------------------------------------------
 if ($action === 'export_csv') {
@@ -722,15 +623,6 @@ if ($action === 'export_csv') {
         }
     }
 
-    // Fallback if DB empty
-    if (empty($entries)) {
-        $backupFile = __DIR__ . '/../data/entries_backup.json';
-        if (file_exists($backupFile)) {
-            $entries = json_decode(file_get_contents($backupFile), true) ?: [];
-        }
-    }
-
-    // Stream CSV
     $filename = 'meridian_contest_export_' . date('Y-m-d_His') . '.csv';
     header('Content-Type: text/csv; charset=utf-8');
     header('Content-Disposition: attachment; filename="' . $filename . '"');

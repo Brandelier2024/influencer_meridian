@@ -257,6 +257,10 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
             <span class="hidden md:inline">Export CSV</span>
           </button>
 
+          <button onclick="refreshDashboard()" class="p-2 text-slate-500 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition" title="Refresh Live Data">
+            <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+          </button>
+
           <a href="../index.html" target="_blank" class="p-2 text-slate-500 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition" title="View Public Website">
             <i data-lucide="external-link" class="w-4 h-4"></i>
           </a>
@@ -342,22 +346,24 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
           </div>
         </div>
 
-        <!-- Card 4: Offline Backup & Sync -->
+        <!-- Card 4: Store Parlour Network & Today -->
         <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between hover:border-slate-300 transition">
           <div class="flex items-center justify-between">
-            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Offline Fail-Safe</span>
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Parlours & Activity</span>
             <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <i data-lucide="shield-check" class="w-5 h-5"></i>
+              <i data-lucide="store" class="w-5 h-5"></i>
             </div>
           </div>
-          <div class="mt-3 flex items-center justify-between">
+          <div class="mt-4 flex items-center justify-between">
             <div>
-              <div class="text-xs text-slate-500 font-medium">Backup Store</div>
-              <div class="text-xl font-heading font-bold text-slate-800" id="statBackupCount">0 entries</div>
+              <div class="text-xs text-slate-500 font-semibold">Today</div>
+              <div class="text-2xl font-heading font-black text-blue-600" id="statTodayCount">0</div>
             </div>
-            <button onclick="triggerSyncBackup()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold shadow-xs transition flex items-center gap-1.5">
-              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i> Sync DB
-            </button>
+            <div class="h-8 w-px bg-slate-200"></div>
+            <div>
+              <div class="text-xs text-slate-500 font-semibold">Active Parlours</div>
+              <div class="text-2xl font-heading font-black text-slate-900" id="statActiveParlours">0</div>
+            </div>
           </div>
         </div>
 
@@ -727,13 +733,22 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
           document.getElementById('statGroupCount').textContent = s.categories.group || 0;
           document.getElementById('statShortlistedCount').textContent = s.shortlisted || 0;
           document.getElementById('statWinnersCount').textContent = s.winners || 0;
-          document.getElementById('statBackupCount').textContent = (s.backup_count || 0) + ' entries';
+          if (document.getElementById('statTodayCount')) {
+            document.getElementById('statTodayCount').textContent = s.today || 0;
+          }
+          if (document.getElementById('statActiveParlours')) {
+            document.getElementById('statActiveParlours').textContent = s.active_parlours || 0;
+          }
 
           const ind = document.getElementById('dbStatusIndicator');
-          if (s.db_connected) {
-            ind.textContent = 'Hostinger MySQL Connected';
-          } else {
-            ind.textContent = 'Offline File Storage Active';
+          if (ind) {
+            if (s.db_driver === 'mysql') {
+              ind.textContent = 'Hostinger MySQL Database Active';
+            } else if (s.db_driver === 'sqlite') {
+              ind.textContent = 'Local SQLite Database Active';
+            } else {
+              ind.textContent = 'SQL Database Connected';
+            }
           }
         }
       } catch (err) {
@@ -1196,23 +1211,11 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
       }
     }
 
-    async function triggerSyncBackup() {
+    async function refreshDashboard() {
       try {
-        const res = await fetch('api.php?action=sync_backup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
-          body: JSON.stringify({ csrf_token: CSRF_TOKEN })
-        });
-        const data = await res.json();
-        if (data.success) {
-          alert(data.message);
-          await loadStats();
-          loadEntries(1);
-        } else {
-          alert(data.message || 'Sync failed');
-        }
+        await Promise.all([loadStats(), loadEntries(currentPage)]);
       } catch (err) {
-        alert('Error communicating with sync endpoint');
+        console.error('Refresh error', err);
       }
     }
 

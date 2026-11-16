@@ -1,15 +1,10 @@
 <?php
 /**
  * Meridian Ice Cream Brand Ambassador Contest
- * Secure Contestant Registration API Endpoint
+ * Contestant Registration API Endpoint
  * 
- * Features:
- * - Anti-bot honeypot protection
- * - IP rate limiting (10 submissions / 5 mins)
- * - Cryptographically secure 6-digit ticket generator with collision retry
- * - Robust input validation and length limits
- * - PDO prepared statements (immune to SQL injection)
- * - Protected fallback storage without internal server error leaks
+ * Inserts contestant registrations directly into the database.
+ * No JSON failsafe files — the SQL database is the single source of truth.
  */
 
 header('Content-Type: application/json; charset=utf-8');
@@ -20,7 +15,6 @@ header('X-Frame-Options: DENY');
 $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
 if (!empty($origin)) {
     $parsedHost = parse_url($origin, PHP_URL_HOST);
-    // Allow localhost, 127.0.0.1, or meridian domains
     if (in_array($parsedHost, ['localhost', '127.0.0.1']) || 
         preg_match('/(^|\.)meridianicecreams\.com$/i', $parsedHost)) {
         header("Access-Control-Allow-Origin: " . $origin);
@@ -52,17 +46,17 @@ $jsonInput = json_decode($rawInput, true);
 
 $honeypot = trim($_POST['contest_hp'] ?? $jsonInput['contest_hp'] ?? '');
 if (!empty($honeypot)) {
-    // Bot trapped in honeypot. Return success silently to prevent adaptation.
+    // Bot trapped in honeypot. Return success silently.
     echo json_encode([
         'success'    => true,
-        'entry_id'   => '9999',
-        'entry_code' => 'M-2026-9999',
+        'entry_id'   => '999999',
+        'entry_code' => 'M-2026-999999',
         'message'    => 'Registration received.'
     ]);
     exit;
 }
 
-// 2. Client IP & Basic Rate Limiting (Max 10 submissions per 5 minutes per IP)
+// 2. Client IP & Basic Rate Limiting
 $clientIp = $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
 $userAgent = mb_substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255);
 
@@ -94,7 +88,6 @@ if (empty($fullName)) {
     $errors[] = 'Full name is required.';
 }
 
-// Digits-only mobile validation
 $cleanMobile = preg_replace('/[^0-9]/', '', $mobileNumber);
 if (strlen($cleanMobile) !== 10) {
     $errors[] = 'A valid 10-digit mobile number is required.';
@@ -126,174 +119,82 @@ if (!empty($errors)) {
     exit;
 }
 
-// 5. Generate Cryptographically Secure 6-digit Code (e.g. M-2026-784291)
-function generateSecureCode()
-{
-    return 'M-2026-' . random_int(100000, 999999);
-}
-
+// 5. Connect to Database (Single Source of Truth)
 $pdo = getDbConnection();
 
-if ($pdo) {
+if (!$pdo) {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Database connection unavailable. Please verify database configuration.'
+    ]);
+    exit;
+}
+
+// 6. Generate 6-digit Code & Insert into Database
+$insertSql = "
+INSERT INTO `meridian_contest_entries` 
+(`entry_code`, `full_name`, `mobile_number`, `email_address`, `category`, `video_url`, `city`, `store_code`, `instagram_handle`, `terms_agreed`, `ip_address`, `user_agent`)
+VALUES 
+(:entry_code, :full_name, :mobile_number, :email_address, :category, :video_url, :city, :store_code, :instagram_handle, :terms_agreed, :ip_address, :user_agent)
+";
+
+$stmt = $pdo->prepare($insertSql);
+
+$inserted = false;
+$entryCode = '';
+$dbInsertId = 0;
+
+for ($attempt = 0; $attempt < 3; $attempt++) {
+    $entryCode = 'M-2026-' . random_int(100000, 999999);
     try {
-        // Auto-create table if it doesn't already exist
-        $createTableSql = "
-        CREATE TABLE IF NOT EXISTS `meridian_contest_entries` (
-            `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-            `entry_code` VARCHAR(32) NOT NULL UNIQUE,
-            `full_name` VARCHAR(150) NOT NULL,
-            `mobile_number` VARCHAR(20) NOT NULL,
-            `email_address` VARCHAR(150) NOT NULL,
-            `category` ENUM('male', 'female', 'child', 'group') NOT NULL DEFAULT 'male',
-            `video_url` VARCHAR(500) NULL,
-            `city` VARCHAR(80) NOT NULL DEFAULT 'pune',
-            `store_code` VARCHAR(50) NOT NULL DEFAULT 'GENERAL',
-            `instagram_handle` VARCHAR(100) NULL,
-            `terms_agreed` TINYINT(1) NOT NULL DEFAULT 1,
-            `status` ENUM('registered', 'under_review', 'shortlisted', 'winner') NOT NULL DEFAULT 'registered',
-            `ip_address` VARCHAR(45) NULL,
-            `user_agent` VARCHAR(255) NULL,
-            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            INDEX idx_category (`category`),
-            INDEX idx_store_code (`store_code`),
-            INDEX idx_status (`status`),
-            INDEX idx_created_at (`created_at`)
-        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-        ";
-        $pdo->exec($createTableSql);
-
-        $insertSql = "
-        INSERT INTO `meridian_contest_entries` 
-        (`entry_code`, `full_name`, `mobile_number`, `email_address`, `category`, `video_url`, `city`, `store_code`, `instagram_handle`, `terms_agreed`, `ip_address`, `user_agent`)
-        VALUES 
-        (:entry_code, :full_name, :mobile_number, :email_address, :category, :video_url, :city, :store_code, :instagram_handle, :terms_agreed, :ip_address, :user_agent)
-        ";
-
-        $stmt = $pdo->prepare($insertSql);
-
-        // Attempt insertion with up to 3 retries in case of rare ticket code collision
-        $inserted = false;
-        $entryCode = '';
-        $dbInsertId = 0;
-
-        for ($attempt = 0; $attempt < 3; $attempt++) {
-            $entryCode = generateSecureCode();
-            try {
-                $stmt->execute([
-                    ':entry_code'       => $entryCode,
-                    ':full_name'        => $fullName,
-                    ':mobile_number'    => $cleanMobile,
-                    ':email_address'    => $emailAddress,
-                    ':category'         => $category,
-                    ':video_url'        => $videoUrl,
-                    ':city'             => $city,
-                    ':store_code'       => $storeCode,
-                    ':instagram_handle' => $instagram,
-                    ':terms_agreed'     => $termsAgreed,
-                    ':ip_address'       => $clientIp,
-                    ':user_agent'       => $userAgent
-                ]);
-                $dbInsertId = $pdo->lastInsertId();
-                $inserted = true;
-                break;
-            } catch (PDOException $ex) {
-                // If collision on entry_code, retry with a fresh code
-                if ($ex->getCode() == 23000 && strpos($ex->getMessage(), 'entry_code') !== false) {
-                    continue;
-                }
-                throw $ex; // Re-throw other database errors to catch block
-            }
-        }
-
-        if ($inserted) {
-            echo json_encode([
-                'success'    => true,
-                'entry_id'   => substr($entryCode, -6),
-                'entry_code' => $entryCode,
-                'db_id'      => $dbInsertId,
-                'message'    => 'Congratulations! You are officially registered for the Meridian Brand Ambassador Contest 2026-2027.',
-                'category'   => $category,
-                'storage'    => 'hostinger_mysql'
-            ]);
-            exit;
-        }
-
+        $stmt->execute([
+            ':entry_code'       => $entryCode,
+            ':full_name'        => $fullName,
+            ':mobile_number'    => $cleanMobile,
+            ':email_address'    => $emailAddress,
+            ':category'         => $category,
+            ':video_url'        => $videoUrl,
+            ':city'             => $city,
+            ':store_code'       => $storeCode,
+            ':instagram_handle' => $instagram,
+            ':terms_agreed'     => $termsAgreed,
+            ':ip_address'       => $clientIp,
+            ':user_agent'       => $userAgent
+        ]);
+        $dbInsertId = $pdo->lastInsertId();
+        $inserted = true;
+        break;
     } catch (PDOException $ex) {
+        if ($ex->getCode() == 23000 && strpos($ex->getMessage(), 'entry_code') !== false) {
+            continue; // Retry on rare unique ticket collision
+        }
         error_log("Database Insert Error: " . $ex->getMessage());
-        // Fall back to protected offline store without leaking SQL internals
-        $entryCode = generateSecureCode();
-        saveOfflineBackupSafe([
-            'entry_code'    => $entryCode,
-            'full_name'     => $fullName,
-            'mobile_number' => $cleanMobile,
-            'email_address' => $emailAddress,
-            'category'      => $category,
-            'city'          => $city,
-            'store_code'    => $storeCode,
-            'created_at'    => date('Y-m-d H:i:s')
-        ]);
-
-        echo json_encode([
-            'success'    => true,
-            'entry_id'   => substr($entryCode, -6),
-            'entry_code' => $entryCode,
-            'message'    => 'Registration confirmed and safely recorded in backup queue.',
-            'storage'    => 'local_backup'
-        ]);
-        exit;
+        break;
     }
 }
 
-// Fallback when MySQL is not connected
-$entryCode = generateSecureCode();
-saveOfflineBackupSafe([
-    'entry_code'    => $entryCode,
-    'full_name'     => $fullName,
-    'mobile_number' => $cleanMobile,
-    'email_address' => $emailAddress,
-    'category'      => $category,
-    'city'          => $city,
-    'store_code'    => $storeCode,
-    'created_at'    => date('Y-m-d H:i:s')
-]);
-
-echo json_encode([
-    'success'    => true,
-    'entry_id'   => substr($entryCode, -6),
-    'entry_code' => $entryCode,
-    'message'    => 'Registration saved successfully.',
-    'storage'    => 'local_backup'
-]);
-exit;
-
-/**
- * Protected offline backup storage
- */
-function saveOfflineBackupSafe($data)
-{
-    $dir = __DIR__ . '/../data';
-    if (!is_dir($dir)) {
-        @mkdir($dir, 0750, true);
-    }
-    
-    // Ensure .htaccess protection exists
-    $htaccess = $dir . '/.htaccess';
-    if (!file_exists($htaccess)) {
-        @file_put_contents($htaccess, "<IfModule mod_authz_core.c>\n    Require all denied\n</IfModule>\n<IfModule !mod_authz_core.c>\n    Deny from all\n</IfModule>\n");
-    }
-
-    $file = $dir . '/entries_backup.json';
-    $entries = [];
-    if (file_exists($file)) {
-        $existing = file_get_contents($file);
-        $entries = json_decode($existing, true) ?: [];
-    }
-    $entries[] = $data;
-    @file_put_contents($file, json_encode($entries, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+if ($inserted) {
+    echo json_encode([
+        'success'    => true,
+        'entry_id'   => substr($entryCode, -6),
+        'entry_code' => $entryCode,
+        'db_id'      => $dbInsertId,
+        'message'    => 'Congratulations! You are officially registered for the Meridian Brand Ambassador Contest 2026-2027.',
+        'category'   => $category
+    ]);
+    exit;
+} else {
+    http_response_code(500);
+    echo json_encode([
+        'success' => false,
+        'message' => 'Unable to save registration to database. Please try again.'
+    ]);
+    exit;
 }
 
 /**
- * Lightweight IP rate-limiting (Max 10 requests per 300 seconds per IP)
+ * Lightweight IP rate-limiting (Max 15 requests per 300 seconds per IP)
  */
 function checkRateLimit($ip)
 {
@@ -306,14 +207,13 @@ function checkRateLimit($ip)
     $limitFile = $cacheDir . '/' . $hash . '.json';
     $now = time();
     $window = 300; // 5 minutes
-    $maxRequests = 10;
+    $maxRequests = 15;
 
     $records = [];
     if (file_exists($limitFile)) {
         $records = json_decode(file_get_contents($limitFile), true) ?: [];
     }
 
-    // Filter out timestamps older than the window
     $records = array_filter($records, function ($ts) use ($now, $window) {
         return ($now - $ts) < $window;
     });
