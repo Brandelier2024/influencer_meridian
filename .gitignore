@@ -1,0 +1,11 @@
+# Security & Sensitive Configuration
+api/config.php
+data/
+*.log
+
+# OS & Editor Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+

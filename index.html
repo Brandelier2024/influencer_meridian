@@ -2331,6 +2331,10 @@
           </p>
 
           <form id="contestRegistrationForm" onsubmit="handleRegistrationSubmit(event)">
+            <!-- Anti-Bot Honeypot Field (Invisible to human users) -->
+            <div style="position: absolute; left: -9999px; top: -9999px; opacity: 0; pointer-events: none;" aria-hidden="true">
+              <input type="text" name="contest_hp" tabindex="-1" autocomplete="off" value="">
+            </div>
             
             <!-- Full Name -->
             <div class="form-group-item">

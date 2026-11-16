@@ -1,25 +1,54 @@
 <?php
 /**
  * Meridian Ice Cream Brand Ambassador Contest
- * Contest Entries Export & Reporting Tool
+ * Secure Contest Entries Export & Reporting Tool
  * 
  * Usage:
- * - CSV Export: api/export.php?key=MeridianAdmin2026&format=csv
- * - JSON Feed: api/export.php?key=MeridianAdmin2026&format=json
+ * - CSV Export: api/export.php?key=<YOUR_ADMIN_KEY>&format=csv
+ * - JSON Feed: api/export.php?key=<YOUR_ADMIN_KEY>&format=json
+ * 
+ * Supported Auth:
+ * - Query Parameter: ?key=...
+ * - Header: Authorization: Bearer <key>
+ * - Header: X-Admin-Key: <key>
  */
 
 require_once __DIR__ . '/config.php';
 
-$key = $_GET['key'] ?? '';
-$format = $_GET['format'] ?? 'csv';
-$categoryFilter = $_GET['category'] ?? '';
+// Security Headers
+header('X-Content-Type-Options: nosniff');
+header('X-Frame-Options: DENY');
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0, private');
+header('Pragma: no-cache');
 
-// Check secret admin key
-if ($key !== ADMIN_SECRET_KEY) {
-    http_response_code(403);
-    echo json_encode(['error' => 'Unauthorized. Please supply the valid admin key: ?key=' . ADMIN_SECRET_KEY]);
+// Extract admin key from multiple possible sources
+$providedKey = '';
+
+if (!empty($_GET['key'])) {
+    $providedKey = trim((string)$_GET['key']);
+} elseif (!empty($_SERVER['HTTP_X_ADMIN_KEY'])) {
+    $providedKey = trim((string)$_SERVER['HTTP_X_ADMIN_KEY']);
+} elseif (!empty($_SERVER['HTTP_AUTHORIZATION'])) {
+    $authHeader = trim((string)$_SERVER['HTTP_AUTHORIZATION']);
+    if (preg_match('/^Bearer\s+(.+)$/i', $authHeader, $matches)) {
+        $providedKey = $matches[1];
+    }
+}
+
+// Timing-safe secret key verification
+if (empty($providedKey) || !hash_equals(ADMIN_SECRET_KEY, $providedKey)) {
+    http_response_code(401);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode([
+        'success' => false,
+        'error'   => 'Unauthorized',
+        'message' => 'Valid administrator credentials required.'
+    ]);
     exit;
 }
+
+$format = strtolower(trim($_GET['format'] ?? 'csv'));
+$categoryFilter = strtolower(trim($_GET['category'] ?? ''));
 
 $pdo = getDbConnection();
 $entries = [];
@@ -38,25 +67,48 @@ if ($pdo) {
         $stmt->execute($params);
         $entries = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
+        error_log("Export Query Error: " . $e->getMessage());
         $entries = [];
     }
 }
 
-// Check backup file if DB returned empty or DB unavailable
+// Check offline backup store if DB returned empty
 if (empty($entries)) {
     $backupFile = __DIR__ . '/../data/entries_backup.json';
     if (file_exists($backupFile)) {
-        $entries = json_decode(file_get_contents($backupFile), true) ?: [];
+        $raw = file_get_contents($backupFile);
+        $entries = json_decode($raw, true) ?: [];
     }
 }
 
+// JSON Output Format
 if ($format === 'json') {
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode([
-        'total' => count($entries),
+        'success' => true,
+        'total'   => count($entries),
         'entries' => $entries
-    ], JSON_PRETTY_PRINT);
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
     exit;
+}
+
+/**
+ * Sanitize cell values against CSV / Formula Injection (DDE)
+ * Prevents execution of malicious formulas in Excel/LibreOffice
+ */
+function sanitizeCsvCell($value)
+{
+    if ($value === null || $value === '') {
+        return '-';
+    }
+    $str = (string)$value;
+    $firstChar = substr($str, 0, 1);
+    
+    // If field starts with formula trigger characters, prefix with single quote
+    if (in_array($firstChar, ['=', '+', '-', '@', "\t", "\r", "\n", '%'])) {
+        return "'" . $str;
+    }
+    return $str;
 }
 
 // Default: CSV Export
@@ -66,29 +118,42 @@ header('Content-Disposition: attachment; filename="' . $filename . '"');
 
 $output = fopen('php://output', 'w');
 
-// UTF-8 BOM for Excel compatibility
-fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
+// UTF-8 BOM for Microsoft Excel compatibility
+fprintf($output, chr(0xEF) . chr(0xBB) . chr(0xBF));
 
 // CSV Header
-fputcsv($output, ['ID', 'Entry Code', 'Full Name', 'Mobile Number', 'Email Address', 'Category', 'Video URL', 'City', 'Store Code', 'Instagram Handle', 'Status', 'Submission Date']);
+fputcsv($output, [
+    'ID',
+    'Entry Code',
+    'Full Name',
+    'Mobile Number',
+    'Email Address',
+    'Category',
+    'Video URL',
+    'City',
+    'Store Code',
+    'Instagram Handle',
+    'Status',
+    'Submission Date'
+]);
 
+// Stream sanitized CSV rows
 foreach ($entries as $row) {
     fputcsv($output, [
-        $row['id'] ?? '-',
-        $row['entry_code'] ?? '-',
-        $row['full_name'] ?? '-',
-        $row['mobile_number'] ?? '-',
-        $row['email_address'] ?? '-',
-        $row['category'] ?? '-',
-        $row['video_url'] ?? '-',
-        $row['city'] ?? '-',
-        $row['store_code'] ?? '-',
-        $row['instagram_handle'] ?? '-',
-        $row['status'] ?? 'registered',
-        $row['created_at'] ?? '-'
+        sanitizeCsvCell($row['id'] ?? '-'),
+        sanitizeCsvCell($row['entry_code'] ?? '-'),
+        sanitizeCsvCell($row['full_name'] ?? '-'),
+        sanitizeCsvCell($row['mobile_number'] ?? '-'),
+        sanitizeCsvCell($row['email_address'] ?? '-'),
+        sanitizeCsvCell($row['category'] ?? '-'),
+        sanitizeCsvCell($row['video_url'] ?? '-'),
+        sanitizeCsvCell($row['city'] ?? '-'),
+        sanitizeCsvCell($row['store_code'] ?? '-'),
+        sanitizeCsvCell($row['instagram_handle'] ?? '-'),
+        sanitizeCsvCell($row['status'] ?? 'registered'),
+        sanitizeCsvCell($row['created_at'] ?? '-')
     ]);
 }
 
 fclose($output);
 exit;
-
