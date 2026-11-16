@@ -17,6 +17,8 @@ define('DB_PASS', getenv('DB_PASS') ?: 'your_database_password');
 define('DB_CHARSET', 'utf8mb4');
 
 define('ADMIN_SECRET_KEY', getenv('ADMIN_SECRET_KEY') ?: 'ChangeThisAdminKey2026');
+define('SUPERADMIN_USER', getenv('SUPERADMIN_USER') ?: 'admin');
+define('SUPERADMIN_PASS', getenv('SUPERADMIN_PASS') ?: 'ChangeThisPassword2026');
 
 function getDbConnection()
 {

@@ -28,6 +28,10 @@ define('DB_CHARSET', 'utf8mb4');
 // Admin Passkey for Exporting Contestant CSV (api/export.php)
 define('ADMIN_SECRET_KEY', getenv('ADMIN_SECRET_KEY') ?: 'MeridianAdmin2026');
 
+// Superadmin Dashboard Credentials
+define('SUPERADMIN_USER', getenv('SUPERADMIN_USER') ?: 'admin');
+define('SUPERADMIN_PASS', getenv('SUPERADMIN_PASS') ?: 'Meridian@Super2026');
+
 /**
  * Establish PDO connection with Hostinger MySQL
  * Returns PDO instance or null on connection failure

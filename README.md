@@ -99,3 +99,32 @@ This project includes a production-ready PHP/MySQL backend specifically architec
    - The table `meridian_contest_entries` will be automatically generated on the first contestant submission, or you can import `database_setup.sql` into phpMyAdmin.
    - To export registrations to an Excel CSV sheet anytime, visit:
      `https://yourdomain.com/api/export.php?key=MeridianAdmin2026`
+
+
+---
+
+## 🛡️ Superadmin Control Dashboard (`admin/`)
+
+A dedicated administrative command center is available at `admin/` (or `https://yourdomain.com/admin/`).
+
+### Features:
+1. **Authentication**:
+   - Secure login with session regeneration and CSRF protection.
+   - Default Username: `admin`
+   - Default Password: `Meridian@Super2026` (or can be customized in `api/config.php` via `SUPERADMIN_PASS`).
+2. **Metrics Overview**:
+   - Real-time total contestant counter.
+   - Category distribution (Male, Female, Child/Family, Group).
+   - Shortlisted and winner tracker.
+   - Offline fail-safe queue status.
+3. **Data Management & CRUD**:
+   - Instant search by ticket code (`#M-2026-XXXX`), name, mobile, email, or parlour store code.
+   - Category and review status filters (`Registered`, `Under Review`, `Shortlisted`, `Winner`, `Rejected`).
+   - One-click status changer directly from the table.
+   - Full contestant dossier viewer (shows submitted Instagram reel, IP address, registration timestamp).
+   - Edit contestant records.
+   - Delete single or bulk entries.
+   - Add new walk-in / parlour contestants manually.
+4. **Data Synchronization & Export**:
+   - **Sync DB**: Imports any entries stored in `data/entries_backup.json` into MySQL with 1 click.
+   - **Export CSV**: Instant, formula-sanitized CSV export.
