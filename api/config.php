@@ -28,9 +28,9 @@ define('DB_CHARSET', 'utf8mb4');
 // Admin Passkey for Exporting Contestant CSV (api/export.php)
 define('ADMIN_SECRET_KEY', getenv('ADMIN_SECRET_KEY') ?: 'MeridianAdmin2026');
 
-// Superadmin Dashboard Credentials
-define('SUPERADMIN_USER', getenv('SUPERADMIN_USER') ?: 'admin');
-define('SUPERADMIN_PASS', getenv('SUPERADMIN_PASS') ?: 'Meridian@Super2026');
+// Initial Superadmin Seed Credentials (Used ONLY on fresh database installation to seed meridian_admin_users)
+define('SUPERADMIN_DEFAULT_USER', getenv('SUPERADMIN_DEFAULT_USER') ?: 'admin');
+define('SUPERADMIN_DEFAULT_PASS', getenv('SUPERADMIN_DEFAULT_PASS') ?: 'Meridian@Super2026');
 
 /**
  * Establish PDO connection
@@ -121,6 +121,22 @@ function initDatabaseTable(PDO $pdo, string $driver)
             INDEX idx_status (`status`),
             INDEX idx_created_at (`created_at`)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+        CREATE TABLE IF NOT EXISTS `meridian_admin_users` (
+            `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+            `username` VARCHAR(50) NOT NULL UNIQUE,
+            `password_hash` VARCHAR(255) NOT NULL,
+            `full_name` VARCHAR(100) NOT NULL DEFAULT 'Super Administrator',
+            `email` VARCHAR(150) NULL,
+            `role` VARCHAR(30) NOT NULL DEFAULT 'superadmin',
+            `status` ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+            `last_login_at` DATETIME NULL,
+            `last_login_ip` VARCHAR(45) NULL,
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            INDEX idx_admin_username (`username`),
+            INDEX idx_admin_status (`status`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ";
         $pdo->exec($sql);
     } else {
@@ -146,7 +162,48 @@ function initDatabaseTable(PDO $pdo, string $driver)
         CREATE INDEX IF NOT EXISTS idx_store_code ON meridian_contest_entries (store_code);
         CREATE INDEX IF NOT EXISTS idx_status ON meridian_contest_entries (status);
         CREATE INDEX IF NOT EXISTS idx_created_at ON meridian_contest_entries (created_at);
+
+        CREATE TABLE IF NOT EXISTS `meridian_admin_users` (
+            `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+            `username` TEXT NOT NULL UNIQUE,
+            `password_hash` TEXT NOT NULL,
+            `full_name` TEXT NOT NULL DEFAULT 'Super Administrator',
+            `email` TEXT,
+            `role` TEXT NOT NULL DEFAULT 'superadmin',
+            `status` TEXT NOT NULL DEFAULT 'active',
+            `last_login_at` TEXT,
+            `last_login_ip` TEXT,
+            `created_at` TEXT DEFAULT CURRENT_TIMESTAMP,
+            `updated_at` TEXT DEFAULT CURRENT_TIMESTAMP
+        );
+        CREATE INDEX IF NOT EXISTS idx_admin_username ON meridian_admin_users (username);
+        CREATE INDEX IF NOT EXISTS idx_admin_status ON meridian_admin_users (status);
         ";
         $pdo->exec($sql);
+    }
+
+    // Auto-seed default Superadmin in database if table is empty
+    try {
+        $checkStmt = $pdo->query("SELECT COUNT(*) FROM `meridian_admin_users`");
+        if ((int)$checkStmt->fetchColumn() === 0) {
+            $defaultUser = defined('SUPERADMIN_DEFAULT_USER') ? SUPERADMIN_DEFAULT_USER : 'admin';
+            $defaultPass = defined('SUPERADMIN_DEFAULT_PASS') ? SUPERADMIN_DEFAULT_PASS : 'Meridian@Super2026';
+            $hash = password_hash($defaultPass, PASSWORD_DEFAULT);
+
+            $seedStmt = $pdo->prepare("
+                INSERT INTO `meridian_admin_users` 
+                (`username`, `password_hash`, `full_name`, `email`, `role`, `status`)
+                VALUES 
+                (:u, :p, :fn, :em, 'superadmin', 'active')
+            ");
+            $seedStmt->execute([
+                ':u'  => $defaultUser,
+                ':p'  => $hash,
+                ':fn' => 'Meridian Super Administrator',
+                ':em' => 'admin@meridianicecreams.com'
+            ]);
+        }
+    } catch (PDOException $ex) {
+        error_log("Superadmin auto-seed notice: " . $ex->getMessage());
     }
 }

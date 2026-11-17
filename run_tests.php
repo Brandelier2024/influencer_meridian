@@ -2,6 +2,7 @@
 /**
  * Meridian Ice Cream Contest - Complete Functional & Security Test Suite
  * Fully sandboxed CLI runner executing each test in isolated subprocesses.
+ * Tests public contest features AND database-driven superadmin authentication.
  */
 
 error_reporting(E_ALL);
@@ -12,7 +13,7 @@ $phpBinary = PHP_BINARY;
 $phpIni = $workspace . DIRECTORY_SEPARATOR . 'php.ini';
 
 echo "========================================================================\n";
-echo " MERIDIAN ICE CREAM CONTEST - COMPLETE FUNCTIONAL & SECURITY TEST SUITE\n";
+echo " MERIDIAN ICE CREAM CONTEST - DATABASE SUPERADMIN & SYSTEM TEST SUITE\n";
 echo "========================================================================\n";
 echo "PHP Binary:  $phpBinary\n";
 echo "PHP Config:  $phpIni\n\n";
@@ -75,7 +76,7 @@ PHP;
 runPhpSubprocess($codeClean);
 
 // -------------------------------------------------------------
-// TEST 1: Database Initialization & Driver Verification
+// TEST 1: Database Initialization & Tables Check
 // -------------------------------------------------------------
 $code = <<<'PHP'
 require_once __DIR__ . '/api/config.php';
@@ -85,26 +86,41 @@ if (!$pdo) {
     exit;
 }
 $driver = $pdo->getAttribute(PDO::ATTR_DRIVER_NAME);
-$count = (int)$pdo->query("SELECT COUNT(*) FROM meridian_contest_entries")->fetchColumn();
-echo json_encode(['success' => true, 'driver' => $driver, 'count' => $count]);
+
+// Check both contest entries and admin users tables
+$adminCount = (int)$pdo->query("SELECT COUNT(*) FROM meridian_admin_users")->fetchColumn();
+$entriesCount = (int)$pdo->query("SELECT COUNT(*) FROM meridian_contest_entries")->fetchColumn();
+
+echo json_encode([
+    'success'     => true,
+    'driver'      => $driver,
+    'admin_count' => $adminCount,
+    'entries_cnt' => $entriesCount
+]);
 PHP;
 
 $res = runPhpSubprocess($code);
 $data = json_decode($res['stdout'], true);
 $driver = $data['driver'] ?? 'unknown';
-report("1. Database Connection & Schema Init", ($data['success'] ?? false) === true, "Active Driver: $driver");
+$adminCount = $data['admin_count'] ?? 0;
+
+report("1. Database Connection & Admin Table Init", 
+    ($data['success'] ?? false) === true && $adminCount >= 1, 
+    "Active Driver: $driver, DB Admins: $adminCount"
+);
 
 // -------------------------------------------------------------
 // TEST 2: Public Contestant Registration (api/register.php)
 // -------------------------------------------------------------
-$code = <<<'PHP'
-$_SERVER['REQUEST_METHOD'] = 'POST';
-$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
-$_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) E2ETest/1.0';
-$_POST = [
-    'full_name'        => 'Aanya Verma',
+$testUniqueId = uniqid();
+$code = <<<PHP
+\$_SERVER['REQUEST_METHOD'] = 'POST';
+\$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+\$_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) E2ETest/1.0';
+\$_POST = [
+    'full_name'        => 'Aanya Verma $testUniqueId',
     'mobile_number'    => '9822998877',
-    'email_address'    => 'aanya.verma@testmail.internal',
+    'email_address'    => 'aanya.$testUniqueId@testmail.internal',
     'category'         => 'female',
     'video_url'        => 'https://instagram.com/reel/meridian_aanya',
     'city'             => 'Pune',
@@ -126,10 +142,11 @@ report("2. Contestant Registration (api/register.php)",
 );
 
 // -------------------------------------------------------------
-// TEST 3: Superadmin Login (admin/api.php?action=login)
+// TEST 3: Superadmin Login via Database (admin/api.php?action=login)
 // -------------------------------------------------------------
 $code = <<<'PHP'
 $_SERVER['REQUEST_METHOD'] = 'POST';
+$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
 $_GET['action'] = 'login';
 $_POST = [
     'username' => 'admin',
@@ -142,13 +159,109 @@ $res = runPhpSubprocess($code);
 $loginData = json_decode($res['stdout'], true);
 $csrfToken = $loginData['csrf_token'] ?? '';
 
-report("3. Superadmin Login & CSRF Token Generation",
-    ($loginData['success'] ?? false) === true && !empty($csrfToken),
-    "Authenticated User: " . ($loginData['username'] ?? 'None') . ", Token: " . substr($csrfToken, 0, 10) . '...'
+// Check database to verify last_login_at and last_login_ip were updated
+$codeMeta = <<<'PHP'
+require_once __DIR__ . '/api/config.php';
+$pdo = getDbConnection();
+$adminRow = $pdo->query("SELECT id, username, role, last_login_at, last_login_ip FROM meridian_admin_users WHERE username = 'admin'")->fetch(PDO::FETCH_ASSOC);
+echo json_encode($adminRow);
+PHP;
+$resMeta = runPhpSubprocess($codeMeta);
+$adminMeta = json_decode($resMeta['stdout'], true);
+$loginIpSaved = ($adminMeta['last_login_ip'] ?? '') === '127.0.0.1';
+$loginTimeSaved = !empty($adminMeta['last_login_at']);
+
+report("3. Database Superadmin Login & Audit Meta",
+    ($loginData['success'] ?? false) === true && !empty($csrfToken) && $loginIpSaved && $loginTimeSaved,
+    "User: " . ($loginData['username'] ?? 'None') . ", Role: " . ($loginData['role'] ?? '') . ", IP Logged: " . ($adminMeta['last_login_ip'] ?? '')
 );
 
 // -------------------------------------------------------------
-// TEST 4: Live Stats Calculation (admin/api.php?action=get_stats)
+// TEST 4: Fetch Admin Profile from Database (action=get_admin_profile)
+// -------------------------------------------------------------
+$code = <<<'PHP'
+session_start();
+$_SESSION['meridian_admin'] = true;
+$_SESSION['admin_user']     = 'admin';
+$_SESSION['csrf_token']     = 'test_token_123';
+$_SERVER['REQUEST_METHOD'] = 'GET';
+$_GET['action'] = 'get_admin_profile';
+require __DIR__ . '/admin/api.php';
+PHP;
+
+$res = runPhpSubprocess($code);
+$profData = json_decode($res['stdout'], true);
+$prof = $profData['profile'] ?? [];
+
+report("4. Superadmin Profile Query (action=get_admin_profile)",
+    ($profData['success'] ?? false) === true && ($prof['username'] ?? '') === 'admin' && ($prof['role'] ?? '') === 'superadmin',
+    "Full Name: " . ($prof['full_name'] ?? '') . ", Email: " . ($prof['email'] ?? '')
+);
+
+// -------------------------------------------------------------
+// TEST 5: Change Password in Database (action=change_password)
+// -------------------------------------------------------------
+$codePwd = <<<'PHP'
+session_start();
+$_SESSION['meridian_admin'] = true;
+$_SESSION['admin_user']     = 'admin';
+$_SESSION['csrf_token']     = 'test_token_123';
+$_SERVER['REQUEST_METHOD'] = 'POST';
+$_SERVER['HTTP_X_CSRF_TOKEN'] = 'test_token_123';
+$_GET['action'] = 'change_password';
+$_POST = [
+    'current_password' => 'Meridian@Super2026',
+    'new_password'     => 'MeridianUpdatedPass@2027!',
+    'confirm_password' => 'MeridianUpdatedPass@2027!',
+    'csrf_token'       => 'test_token_123'
+];
+require __DIR__ . '/admin/api.php';
+PHP;
+
+$resPwd = runPhpSubprocess($codePwd);
+$pwdData = json_decode($resPwd['stdout'], true);
+
+// Verify that login with new password succeeds
+$codeTestNew = <<<'PHP'
+$_SERVER['REQUEST_METHOD'] = 'POST';
+$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+$_GET['action'] = 'login';
+$_POST = [
+    'username' => 'admin',
+    'password' => 'MeridianUpdatedPass@2027!'
+];
+require __DIR__ . '/admin/api.php';
+PHP;
+$resTestNew = runPhpSubprocess($codeTestNew);
+$newLoginData = json_decode($resTestNew['stdout'], true);
+$newLoginWorks = ($newLoginData['success'] ?? false) === true;
+
+// Reset password back to standard default
+$codeReset = <<<'PHP'
+session_start();
+$_SESSION['meridian_admin'] = true;
+$_SESSION['admin_user']     = 'admin';
+$_SESSION['csrf_token']     = 'test_token_123';
+$_SERVER['REQUEST_METHOD'] = 'POST';
+$_SERVER['HTTP_X_CSRF_TOKEN'] = 'test_token_123';
+$_GET['action'] = 'change_password';
+$_POST = [
+    'current_password' => 'MeridianUpdatedPass@2027!',
+    'new_password'     => 'Meridian@Super2026',
+    'confirm_password' => 'Meridian@Super2026',
+    'csrf_token'       => 'test_token_123'
+];
+require __DIR__ . '/admin/api.php';
+PHP;
+runPhpSubprocess($codeReset);
+
+report("5. Change Superadmin Password in Database",
+    ($pwdData['success'] ?? false) === true && $newLoginWorks,
+    "Updated password in database verified, reset cleanly to standard"
+);
+
+// -------------------------------------------------------------
+// TEST 6: Live Stats Calculation (admin/api.php?action=get_stats)
 // -------------------------------------------------------------
 $code = <<<'PHP'
 session_start();
@@ -166,23 +279,23 @@ $stats = $statsData['stats'] ?? [];
 $totalEntries = $stats['total'] ?? 0;
 $femaleCount = $stats['categories']['female'] ?? 0;
 
-report("4. Live Dashboard Stats Query (action=get_stats)",
+report("6. Live Dashboard Stats Query (action=get_stats)",
     ($statsData['success'] ?? false) === true && $totalEntries >= 1 && $femaleCount >= 1,
     "Total Contestants: $totalEntries, Female Category: $femaleCount, Driver: " . ($stats['db_driver'] ?? 'N/A')
 );
 
 // -------------------------------------------------------------
-// TEST 5: Get Entries & Search Filter (action=get_entries)
+// TEST 7: Get Entries & Search Filter (action=get_entries)
 // -------------------------------------------------------------
-$code = <<<'PHP'
+$code = <<<PHP
 session_start();
-$_SESSION['meridian_admin'] = true;
-$_SESSION['admin_user']     = 'admin';
-$_SESSION['csrf_token']     = 'test_token_123';
-$_SERVER['REQUEST_METHOD'] = 'GET';
-$_GET = [
+\$_SESSION['meridian_admin'] = true;
+\$_SESSION['admin_user']     = 'admin';
+\$_SESSION['csrf_token']     = 'test_token_123';
+\$_SERVER['REQUEST_METHOD'] = 'GET';
+\$_GET = [
     'action'   => 'get_entries',
-    'search'   => 'Aanya',
+    'search'   => '$createdEntryCode',
     'category' => 'female',
     'page'     => 1,
     'limit'    => 10
@@ -193,15 +306,15 @@ PHP;
 $res = runPhpSubprocess($code);
 $entriesData = json_decode($res['stdout'], true);
 $entriesList = $entriesData['entries'] ?? [];
-$foundCandidate = !empty($entriesList) && $entriesList[0]['email_address'] === 'aanya.verma@testmail.internal';
+$foundCandidate = !empty($entriesList) && $entriesList[0]['entry_code'] === $createdEntryCode;
 
-report("5. Filtered Search & Pagination (action=get_entries)",
+report("7. Filtered Search & Pagination (action=get_entries)",
     $foundCandidate,
-    "Found " . count($entriesList) . " match: " . ($entriesList[0]['full_name'] ?? 'None')
+    "Found " . count($entriesList) . " match for $createdEntryCode"
 );
 
 // -------------------------------------------------------------
-// TEST 6: Single Status Update (action=update_status)
+// TEST 8: Single Status Update (action=update_status)
 // -------------------------------------------------------------
 $code = <<<PHP
 session_start();
@@ -233,13 +346,13 @@ PHP;
 $resVerify = runPhpSubprocess($codeVerify);
 $currentStatus = trim($resVerify['stdout']);
 
-report("6. Single Status Update to 'shortlisted'",
+report("8. Single Status Update to 'shortlisted'",
     ($statusData['success'] ?? false) === true && $currentStatus === 'shortlisted',
     "Status in DB: $currentStatus"
 );
 
 // -------------------------------------------------------------
-// TEST 7: Single Entry Edit (action=update_entry)
+// TEST 9: Single Entry Edit (action=update_entry)
 // -------------------------------------------------------------
 $code = <<<PHP
 session_start();
@@ -253,7 +366,7 @@ session_start();
     'id'               => $createdDbId,
     'full_name'        => 'Aanya Vikram Verma',
     'mobile_number'    => '9822998877',
-    'email_address'    => 'aanya.verma@testmail.internal',
+    'email_address'    => 'aanya.$testUniqueId@testmail.internal',
     'category'         => 'female',
     'video_url'        => 'https://instagram.com/reel/updated_aanya',
     'city'             => 'Mumbai',
@@ -279,13 +392,13 @@ PHP;
 $resVerify = runPhpSubprocess($codeVerify);
 $dbRecord = json_decode($resVerify['stdout'], true);
 
-report("7. Single Entry Edit (Name, City, Parlour)",
+report("9. Single Entry Edit (Name, City, Parlour)",
     ($editData['success'] ?? false) === true && ($dbRecord['full_name'] ?? '') === 'Aanya Vikram Verma' && ($dbRecord['city'] ?? '') === 'Mumbai',
     "Name: " . ($dbRecord['full_name'] ?? '') . ", Store: " . ($dbRecord['store_code'] ?? '')
 );
 
 // -------------------------------------------------------------
-// TEST 8: Single Contestant Deletion (action=delete_entry)
+// TEST 10: Single Contestant Deletion (action=delete_entry)
 // -------------------------------------------------------------
 $code = <<<PHP
 session_start();
@@ -316,17 +429,16 @@ PHP;
 $resVerify = runPhpSubprocess($codeVerify);
 $remainingRows = (int)trim($resVerify['stdout']);
 
-report("8. Single Deletion (Permanent Database DELETE)",
+report("10. Single Deletion (Permanent Database DELETE)",
     ($deleteData['success'] ?? false) === true && $remainingRows === 0,
     "Rows remaining in DB with ID #$createdDbId: $remainingRows"
 );
 
 // -------------------------------------------------------------
-// TEST 9: Zombie Resurrection & No Failsafe Verification
+// TEST 11: Zombie Resurrection Check
 // -------------------------------------------------------------
 $backupFilePresent = file_exists($workspace . '/data/entries_backup.json');
 
-// Call get_entries to confirm it does not resurrect the deleted entry
 $code = <<<PHP
 session_start();
 \$_SESSION['meridian_admin'] = true;
@@ -341,13 +453,13 @@ $res = runPhpSubprocess($code);
 $checkData = json_decode($res['stdout'], true);
 $entriesAfterDelete = $checkData['entries'] ?? [];
 
-report("9. Zombie Check (Deleted records NEVER reappear)",
+report("11. Zombie Check (Deleted records NEVER reappear)",
     count($entriesAfterDelete) === 0 && !$backupFilePresent,
     "Matches for $createdEntryCode: " . count($entriesAfterDelete) . ", Backup file present: " . ($backupFilePresent ? 'YES (Error)' : 'NO (Clean)')
 );
 
 // -------------------------------------------------------------
-// TEST 10: Manual Entry Creation (action=create_entry)
+// TEST 12: Manual Entry Creation (action=create_entry)
 // -------------------------------------------------------------
 $code = <<<'PHP'
 session_start();
@@ -419,13 +531,13 @@ $res = runPhpSubprocess($code);
 $manualData = json_decode($res['stdout'], true);
 $manualIds = $manualData['created_ids'] ?? [];
 
-report("10. Manual Entry Creation (2 Contestants)",
+report("12. Manual Entry Creation (2 Contestants)",
     count($manualIds) === 2,
     "Created IDs: #" . implode(', #', $manualIds)
 );
 
 // -------------------------------------------------------------
-// TEST 11: Bulk Status Update (action=bulk_action, sub_action=status_update)
+// TEST 13: Bulk Status Update (action=bulk_action, sub_action=status_update)
 // -------------------------------------------------------------
 $manualIdsExport = var_export($manualIds, true);
 $idsComma = implode(',', $manualIds);
@@ -462,13 +574,13 @@ $bulkStatuses = json_decode($resVerify['stdout'], true) ?: [];
 
 $allWinners = count($bulkStatuses) === 2 && count(array_unique(array_values($bulkStatuses))) === 1 && current($bulkStatuses) === 'winner';
 
-report("11. Bulk Status Update (Mark 2 as 'winner')",
+report("13. Bulk Status Update (Mark 2 as 'winner')",
     ($bulkStatusData['success'] ?? false) === true && $allWinners,
     "Statuses in DB: " . json_encode($bulkStatuses)
 );
 
 // -------------------------------------------------------------
-// TEST 12: Bulk Deletion (action=bulk_action, sub_action=delete)
+// TEST 14: Bulk Deletion (action=bulk_action, sub_action=delete)
 // -------------------------------------------------------------
 $code = <<<PHP
 session_start();
@@ -499,13 +611,13 @@ PHP;
 $resVerify = runPhpSubprocess($codeVerify);
 $remainingManual = (int)trim($resVerify['stdout']);
 
-report("12. Bulk Deletion (action=bulk_action)",
+report("14. Bulk Deletion (action=bulk_action)",
     ($bulkDelData['success'] ?? false) === true && $remainingManual === 0,
     "Remaining in DB: $remainingManual"
 );
 
 // -------------------------------------------------------------
-// TEST 13: Formula Sanitized CSV Export (admin/api.php?action=export_csv)
+// TEST 15: Formula Sanitized CSV Export (admin/api.php?action=export_csv)
 // -------------------------------------------------------------
 $code = <<<'PHP'
 session_start();
@@ -521,13 +633,13 @@ $res = runPhpSubprocess($code);
 $csvOut = $res['stdout'];
 $hasHeader = strpos($csvOut, 'Ticket Code') !== false && strpos($csvOut, 'Full Name') !== false;
 
-report("13. Authenticated CSV Export Generation",
+report("15. Authenticated CSV Export Generation",
     $hasHeader,
     "Export size: " . strlen($csvOut) . " bytes, Valid Header: " . ($hasHeader ? 'YES' : 'NO')
 );
 
 // -------------------------------------------------------------
-// TEST 14: Secure API Key Verification (/api/export.php)
+// TEST 16: Secure API Key Verification (/api/export.php)
 // -------------------------------------------------------------
 // Case A: Valid Key
 $codeValid = <<<'PHP'
@@ -550,13 +662,13 @@ $expDataB = json_decode($resB['stdout'], true);
 $validOk = ($expDataA['success'] ?? false) === true;
 $invalidBlocked = ($expDataB['success'] ?? false) === false && ($expDataB['error'] ?? '') === 'Unauthorized';
 
-report("14. Secure API Key Export Gate (/api/export.php)",
+report("16. Secure API Key Export Gate (/api/export.php)",
     $validOk && $invalidBlocked,
     "Valid key accepted, Invalid key blocked with 401 Unauthorized"
 );
 
 // -------------------------------------------------------------
-// TEST 15: Superadmin Logout & Session Clearance
+// TEST 17: Superadmin Logout & Session Clearance
 // -------------------------------------------------------------
 $code = <<<'PHP'
 session_start();
@@ -573,7 +685,7 @@ PHP;
 $res = runPhpSubprocess($code);
 $logoutRes = json_decode($res['stdout'], true);
 
-report("15. Superadmin Logout & Session Invalidation",
+report("17. Superadmin Logout & Session Invalidation",
     ($logoutRes['success'] ?? false) === true,
     "Logout message: " . ($logoutRes['message'] ?? 'None')
 );

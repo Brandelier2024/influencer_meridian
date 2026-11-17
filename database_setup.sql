@@ -42,14 +42,28 @@ CREATE TABLE IF NOT EXISTS `meridian_contest_entries` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Meridian Brand Ambassador Contest Registrations';
 
 -- ============================================================
--- Seed Sample Data for Testing / Demonstration
+-- Superadmin Users Table (Database-Driven Authentication)
 -- ============================================================
 
-INSERT INTO `meridian_contest_entries` 
-(`entry_code`, `full_name`, `mobile_number`, `email_address`, `category`, `video_url`, `city`, `store_code`, `instagram_handle`, `status`) 
-VALUES
-('M-2026-1042', 'Aryan Deshmukh', '9822012345', 'aryan.d@example.com', 'male', 'https://instagram.com/reel/meridian_scoop_aryan', 'pune', 'PUN-FC-01', '@aryan_scoops', 'shortlisted'),
-('M-2026-2109', 'Sneha Patil', '9819054321', 'sneha.patil@example.com', 'female', 'https://instagram.com/reel/sneha_strawberry_cone', 'mumbai', 'MUM-BANDRA-02', '@sneha_flavours', 'registered'),
-('M-2026-3841', 'Aarav & Kavya Kulkarni', '9422098765', 'kulkarni.family@example.com', 'child', 'https://instagram.com/reel/aarav_sundae_fun', 'nashik', 'NSK-COLLEGE-01', '@kulkarni_family', 'registered'),
-('M-2026-4552', 'The Fergusson Scoop Squad', '9765011223', 'fc.crewsquad@example.com', 'group', 'https://instagram.com/reel/fergusson_crew_meridian', 'pune', 'PUN-DECCAN-03', '@fc_meridian_crew', 'under_review');
+CREATE TABLE IF NOT EXISTS `meridian_admin_users` (
+  `id` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `username` VARCHAR(50) NOT NULL UNIQUE COMMENT 'Superadmin login handle',
+  `password_hash` VARCHAR(255) NOT NULL COMMENT 'Bcrypt password hash',
+  `full_name` VARCHAR(100) NOT NULL DEFAULT 'Super Administrator',
+  `email` VARCHAR(150) NULL DEFAULT NULL,
+  `role` VARCHAR(30) NOT NULL DEFAULT 'superadmin',
+  `status` ENUM('active', 'inactive') NOT NULL DEFAULT 'active',
+  `last_login_at` DATETIME NULL DEFAULT NULL,
+  `last_login_ip` VARCHAR(45) NULL DEFAULT NULL,
+  `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_admin_username (`username`),
+  INDEX idx_admin_status (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Meridian Administrative Users';
 
+-- Seed default Superadmin (Password: Meridian@Super2026)
+INSERT INTO `meridian_admin_users` 
+(`username`, `password_hash`, `full_name`, `email`, `role`, `status`) 
+VALUES 
+('admin', '$2y$10$sD8GJqH7gBL4TkV3WfBwWew7CCTf5G5hwkx.rIjB2QkWAesTlgecC', 'Meridian Super Administrator', 'admin@meridianicecreams.com', 'superadmin', 'active')
+ON DUPLICATE KEY UPDATE `username` = `username`;

@@ -67,13 +67,15 @@ if ($action === 'check_auth') {
     echo json_encode([
         'authenticated' => $isAuth,
         'username'      => $isAuth ? ($_SESSION['admin_user'] ?? 'Superadmin') : null,
+        'full_name'     => $isAuth ? ($_SESSION['admin_name'] ?? 'Super Administrator') : null,
+        'role'          => $isAuth ? ($_SESSION['admin_role'] ?? 'superadmin') : null,
         'csrf_token'    => $isAuth ? $_SESSION['csrf_token'] : null
     ]);
     exit;
 }
 
 // -------------------------------------------------------------
-// PUBLIC ACTION: LOGIN (With Brute-Force Rate Limiting)
+// PUBLIC ACTION: LOGIN (Database-Driven with Rate Limiting)
 // -------------------------------------------------------------
 if ($action === 'login') {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -100,28 +102,58 @@ if ($action === 'login') {
     $username = trim($_POST['username'] ?? $json['username'] ?? '');
     $password = trim($_POST['password'] ?? $json['password'] ?? '');
 
-    $valid = false;
-    // Check against configured Superadmin credentials
-    if ($username === SUPERADMIN_USER && hash_equals(SUPERADMIN_PASS, $password)) {
-        $valid = true;
-    } elseif ($username === 'admin' && hash_equals(ADMIN_SECRET_KEY, $password)) {
-        $valid = true;
+    if (empty($username) || empty($password)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Username and password are required.']);
+        exit;
     }
 
-    if ($valid) {
+    $pdo = getDbConnection();
+    $authenticatedUser = null;
+
+    if ($pdo) {
+        try {
+            $stmt = $pdo->prepare("SELECT * FROM `meridian_admin_users` WHERE `username` = :u AND `status` = 'active' LIMIT 1");
+            $stmt->execute([':u' => $username]);
+            $userRow = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($userRow && password_verify($password, $userRow['password_hash'])) {
+                // Rehash password if algorithm/cost parameters were updated
+                if (password_needs_rehash($userRow['password_hash'], PASSWORD_DEFAULT)) {
+                    $newHash = password_hash($password, PASSWORD_DEFAULT);
+                    $upStmt = $pdo->prepare("UPDATE `meridian_admin_users` SET `password_hash` = :nh WHERE `id` = :id");
+                    $upStmt->execute([':nh' => $newHash, ':id' => $userRow['id']]);
+                }
+                $authenticatedUser = $userRow;
+
+                // Record login timestamp and IP in database
+                $metaStmt = $pdo->prepare("UPDATE `meridian_admin_users` SET `last_login_at` = CURRENT_TIMESTAMP, `last_login_ip` = :ip WHERE `id` = :id");
+                $metaStmt->execute([':ip' => $clientIp, ':id' => $userRow['id']]);
+            }
+        } catch (PDOException $e) {
+            error_log("Database authentication query error: " . $e->getMessage());
+        }
+    }
+
+    if ($authenticatedUser) {
         clearLoginThrottle($clientIp);
 
         if (session_status() === PHP_SESSION_ACTIVE) {
             session_regenerate_id(true);
         }
         $_SESSION['meridian_admin'] = true;
-        $_SESSION['admin_user'] = $username;
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+        $_SESSION['admin_id']       = (int)$authenticatedUser['id'];
+        $_SESSION['admin_user']     = $authenticatedUser['username'];
+        $_SESSION['admin_name']     = $authenticatedUser['full_name'];
+        $_SESSION['admin_role']     = $authenticatedUser['role'];
+        $_SESSION['csrf_token']     = bin2hex(random_bytes(32));
 
         echo json_encode([
             'success'    => true,
             'message'    => 'Login successful. Welcome Superadmin!',
-            'username'   => $username,
+            'username'   => $authenticatedUser['username'],
+            'full_name'  => $authenticatedUser['full_name'],
+            'role'       => $authenticatedUser['role'],
             'csrf_token' => $_SESSION['csrf_token']
         ]);
         exit;
@@ -651,6 +683,99 @@ if ($action === 'export_csv') {
     }
 
     fclose($output);
+    exit;
+}
+
+// -------------------------------------------------------------
+// ACTION: GET CURRENT ADMIN PROFILE (From Database)
+// -------------------------------------------------------------
+if ($action === 'get_admin_profile') {
+    $userId = (int)($_SESSION['admin_id'] ?? 0);
+    $username = $_SESSION['admin_user'] ?? '';
+
+    $profile = null;
+    if ($pdo) {
+        $stmt = $pdo->prepare("SELECT id, username, full_name, email, role, status, last_login_at, last_login_ip, created_at FROM meridian_admin_users WHERE id = :id OR username = :u LIMIT 1");
+        $stmt->execute([':id' => $userId, ':u' => $username]);
+        $profile = $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    if (!$profile) {
+        http_response_code(404);
+        echo json_encode(['success' => false, 'message' => 'Admin profile not found in database.']);
+        exit;
+    }
+
+    echo json_encode(['success' => true, 'profile' => $profile]);
+    exit;
+}
+
+// -------------------------------------------------------------
+// ACTION: CHANGE ADMIN PASSWORD (In Database)
+// -------------------------------------------------------------
+if ($action === 'change_password') {
+    $raw = file_get_contents('php://input');
+    $data = json_decode($raw, true) ?: $_POST;
+
+    $currentPass = trim($data['current_password'] ?? '');
+    $newPass     = trim($data['new_password'] ?? '');
+    $confirmPass = trim($data['confirm_password'] ?? '');
+
+    if (empty($currentPass) || empty($newPass)) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'message' => 'Current password and new password are required.']);
+        exit;
+    }
+
+    if (strlen($newPass) < 8) {
+        http_response_code(422);
+        echo json_encode(['success' => false, 'message' => 'New password must be at least 8 characters long.']);
+        exit;
+    }
+
+    if ($newPass !== $confirmPass) {
+        http_response_code(422);
+        echo json_encode(['success' => false, 'message' => 'New password and confirmation do not match.']);
+        exit;
+    }
+
+    $userId = (int)($_SESSION['admin_id'] ?? 0);
+    $username = $_SESSION['admin_user'] ?? '';
+
+    if (!$pdo) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Database connection unavailable.']);
+        exit;
+    }
+
+    $stmt = $pdo->prepare("SELECT id, password_hash FROM meridian_admin_users WHERE id = :id OR username = :u LIMIT 1");
+    $stmt->execute([':id' => $userId, ':u' => $username]);
+    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$admin || !password_verify($currentPass, $admin['password_hash'])) {
+        http_response_code(401);
+        echo json_encode(['success' => false, 'message' => 'Current password is incorrect.']);
+        exit;
+    }
+
+    $newHash = password_hash($newPass, PASSWORD_DEFAULT);
+    $upStmt = $pdo->prepare("UPDATE meridian_admin_users SET password_hash = :h, updated_at = CURRENT_TIMESTAMP WHERE id = :id");
+    $upStmt->execute([':h' => $newHash, ':id' => $admin['id']]);
+
+    echo json_encode(['success' => true, 'message' => 'Superadmin password successfully updated in database.']);
+    exit;
+}
+
+// -------------------------------------------------------------
+// ACTION: LIST ALL ADMIN USERS (In Database)
+// -------------------------------------------------------------
+if ($action === 'get_admin_users') {
+    $admins = [];
+    if ($pdo) {
+        $stmt = $pdo->query("SELECT id, username, full_name, email, role, status, last_login_at, last_login_ip, created_at FROM meridian_admin_users ORDER BY id ASC");
+        $admins = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+    echo json_encode(['success' => true, 'admins' => $admins]);
     exit;
 }
 

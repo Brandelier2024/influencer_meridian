@@ -108,23 +108,25 @@ This project includes a production-ready PHP/MySQL backend specifically architec
 A dedicated administrative command center is available at `admin/` (or `https://yourdomain.com/admin/`).
 
 ### Features:
-1. **Authentication**:
-   - Secure login with session regeneration and CSRF protection.
-   - Default Username: `admin`
-   - Default Password: `Meridian@Super2026` (or can be customized in `api/config.php` via `SUPERADMIN_PASS`).
+1. **Database-Driven Authentication**:
+   - Superadmin users are stored directly in SQL table `meridian_admin_users` with bcrypt password hashing (`password_verify`).
+   - Secure login with session regeneration, HttpOnly cookies, and strict CSRF protection.
+   - Default Initial Username: `admin`
+   - Default Initial Password: `Meridian@Super2026` (seeded on install; can be changed directly from the dashboard).
+   - In-dashboard **Change Password** modal allowing superadmin to update their database credentials anytime.
 2. **Metrics Overview**:
    - Real-time total contestant counter.
    - Category distribution (Male, Female, Child/Family, Group).
    - Shortlisted and winner tracker.
-   - Offline fail-safe queue status.
+   - Today's new submissions and active parlour store network metrics.
 3. **Data Management & CRUD**:
    - Instant search by ticket code (`#M-2026-XXXX`), name, mobile, email, or parlour store code.
    - Category and review status filters (`Registered`, `Under Review`, `Shortlisted`, `Winner`, `Rejected`).
    - One-click status changer directly from the table.
    - Full contestant dossier viewer (shows submitted Instagram reel, IP address, registration timestamp).
    - Edit contestant records.
-   - Delete single or bulk entries.
+   - Permanent single or bulk deletion directly from the database (no backup file resurrection).
    - Add new walk-in / parlour contestants manually.
 4. **Data Synchronization & Export**:
-   - **Sync DB**: Imports any entries stored in `data/entries_backup.json` into MySQL with 1 click.
-   - **Export CSV**: Instant, formula-sanitized CSV export.
+   - **Live SQL Database**: Pure SQL database (Hostinger MySQL in production, SQLite in local testing).
+   - **Export CSV**: Instant, formula-sanitized (DDE protected) CSV export.
