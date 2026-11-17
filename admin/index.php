@@ -240,7 +240,8 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
 
       <!-- Top Sticky Header -->
       <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-16 py-2.5 sm:py-0 flex flex-wrap md:flex-nowrap items-center justify-between gap-3 sm:gap-4">
+        <div
+          class="w-full max-w-full px-4 sm:px-6 lg:px-8 min-h-16 py-2.5 sm:py-0 flex flex-wrap md:flex-nowrap items-center justify-between gap-3 sm:gap-4">
 
           <!-- Left: Brand & Title -->
           <div class="flex items-center gap-3 shrink-0">
@@ -258,15 +259,11 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
           </div>
 
           <!-- Center: Database Engine Status Pill -->
-          <div
-            class="hidden lg:flex items-center gap-2 px-3 py-1 bg-slate-50 border border-slate-200/80 rounded-full text-xs">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-slate-600 font-medium" id="dbStatusIndicator">Hostinger MySQL Connected</span>
-          </div>
+
 
           <!-- Right: User Actions & Utilities -->
           <div class="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap justify-end ml-auto">
-            
+
             <!-- Primary Action: Create Contestant -->
             <button onclick="openCreateModal()"
               class="h-9 sm:h-10 px-3.5 sm:px-4 bg-[#D8232A] hover:bg-[#B3181E] text-white rounded-xl text-xs sm:text-sm font-heading font-bold shadow-xs hover:shadow transition flex items-center gap-1.5 shrink-0">
@@ -308,7 +305,8 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
               </div>
               <div class="hidden xl:block text-[11px] leading-tight">
                 <span class="font-bold text-slate-800"><?= $adminUser ?></span>
-                <span class="text-[9px] text-emerald-600 font-semibold block uppercase tracking-wider">DB Superadmin</span>
+                <span class="text-[9px] text-emerald-600 font-semibold block uppercase tracking-wider">DB
+                  Superadmin</span>
               </div>
               <i data-lucide="key-round" class="w-3.5 h-3.5 text-slate-400"></i>
             </button>
@@ -327,7 +325,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
       </header>
 
       <!-- Main Content Container -->
-      <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
+      <main class="w-full max-w-full px-4 sm:px-6 lg:px-8 py-6 flex-1 space-y-6">
 
         <!-- STATS OVERVIEW CARDS (4 Cards) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -351,31 +349,39 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
             </div>
           </div>
 
-          <!-- Card 2: 4 Categories Breakdown -->
+          <!-- Card 2: 5 Categories Breakdown -->
           <div
             class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs flex flex-col justify-between hover:border-slate-300 transition">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Category Distribution</span>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-500">5 Contest Categories</span>
               <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
                 <i data-lucide="pie-chart" class="w-5 h-5"></i>
               </div>
             </div>
-            <div class="mt-4 grid grid-cols-2 gap-2 text-xs">
-              <div class="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                <span class="text-slate-600 flex items-center gap-1.5 font-medium">👨 Male:</span>
-                <strong class="font-bold text-slate-900 font-mono text-sm" id="statMaleCount">0</strong>
+            <div class="mt-3 space-y-1.5 text-xs">
+              <div class="grid grid-cols-2 gap-1.5">
+                <div class="p-1.5 px-2 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between">
+                  <span class="text-slate-600 flex items-center gap-1 font-medium">👨 Male:</span>
+                  <strong class="font-bold text-slate-900 font-mono text-xs" id="statMaleCount">0</strong>
+                </div>
+                <div class="p-1.5 px-2 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between">
+                  <span class="text-slate-600 flex items-center gap-1 font-medium">👩 Female:</span>
+                  <strong class="font-bold text-slate-900 font-mono text-xs" id="statFemaleCount">0</strong>
+                </div>
               </div>
-              <div class="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                <span class="text-slate-600 flex items-center gap-1.5 font-medium">👩 Female:</span>
-                <strong class="font-bold text-slate-900 font-mono text-sm" id="statFemaleCount">0</strong>
+              <div class="grid grid-cols-2 gap-1.5">
+                <div class="p-1.5 px-2 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between">
+                  <span class="text-slate-600 flex items-center gap-1 font-medium">🧒 Kids:</span>
+                  <strong class="font-bold text-slate-900 font-mono text-xs" id="statKidsCount">0</strong>
+                </div>
+                <div class="p-1.5 px-2 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between">
+                  <span class="text-slate-600 flex items-center gap-1 font-medium">👥 Group/Fam:</span>
+                  <strong class="font-bold text-slate-900 font-mono text-xs" id="statGroupCount">0</strong>
+                </div>
               </div>
-              <div class="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                <span class="text-slate-600 flex items-center gap-1.5 font-medium">🧒 Family:</span>
-                <strong class="font-bold text-slate-900 font-mono text-sm" id="statChildCount">0</strong>
-              </div>
-              <div class="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
-                <span class="text-slate-600 flex items-center gap-1.5 font-medium">👥 Group:</span>
-                <strong class="font-bold text-slate-900 font-mono text-sm" id="statGroupCount">0</strong>
+              <div class="p-1.5 px-2.5 rounded-lg bg-red-50/80 border border-red-100 flex items-center justify-between">
+                <span class="text-red-700 flex items-center gap-1 font-bold">🎙️ Voice of Meridian:</span>
+                <strong class="font-bold text-red-900 font-mono text-xs" id="statVoiceCount">0</strong>
               </div>
             </div>
           </div>
@@ -460,11 +466,12 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
             <div class="relative">
               <select id="filterCategory" onchange="loadEntries(1)"
                 class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none focus:border-red-600 focus:bg-white cursor-pointer transition">
-                <option value="">All Categories</option>
+                <option value="">All 5 Categories</option>
                 <option value="male">👨 Male (Solo)</option>
                 <option value="female">👩 Female (Solo)</option>
-                <option value="child">🧒 Child & Family</option>
-                <option value="group">👥 Group Squad</option>
+                <option value="kids">🧒 Kids</option>
+                <option value="group_family">👥 Group / Family</option>
+                <option value="voice_of_meridian">🎙️ Voice of Meridian</option>
               </select>
             </div>
 
@@ -517,7 +524,8 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
               <div>
                 <span id="selectedCount" class="font-black text-sm">0</span> contestants selected
               </div>
-              <button onclick="clearAllSelections()" class="text-xs text-red-700 hover:text-red-900 underline ml-2 font-medium">Deselect all</button>
+              <button onclick="clearAllSelections()"
+                class="text-xs text-red-700 hover:text-red-900 underline ml-2 font-medium">Deselect all</button>
             </div>
 
             <div class="flex flex-wrap items-center gap-2.5 sm:gap-3">
@@ -532,7 +540,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                 class="h-9.5 px-4 bg-[#D8232A] hover:bg-[#B3181E] text-white rounded-xl font-bold shadow-xs transition flex items-center gap-1.5">
                 <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Apply Status
               </button>
-              
+
               <div class="h-6 w-px bg-red-200 mx-1 hidden sm:block"></div>
 
               <button onclick="applyBulkDelete()"
@@ -550,7 +558,8 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
           <!-- 1. Desktop Table View (Hidden on mobile) -->
           <div class="hidden md:block overflow-x-auto custom-scrollbar">
             <table class="w-full text-left text-xs text-slate-600 border-collapse">
-              <thead class="bg-slate-50/90 border-b border-slate-200/80 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
+              <thead
+                class="bg-slate-50/90 border-b border-slate-200/80 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
                 <tr>
                   <th class="p-3.5 pl-5 w-12 text-center">
                     <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()"
@@ -588,13 +597,15 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
           <!-- Table Footer / Pagination -->
           <div
             class="p-4 sm:p-5 border-t border-slate-200/80 bg-slate-50/70 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-            <div id="paginationInfo" class="font-medium text-slate-600 text-center sm:text-left">Showing 0 to 0 of 0 entries</div>
+            <div id="paginationInfo" class="font-medium text-slate-600 text-center sm:text-left">Showing 0 to 0 of 0
+              entries</div>
             <div class="flex items-center gap-2.5">
               <button id="prevPageBtn" onclick="changePage(-1)"
                 class="px-4 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1 shadow-2xs">
                 <i data-lucide="chevron-left" class="w-4 h-4"></i> Previous
               </button>
-              <span id="currentPageNum" class="font-bold text-slate-900 font-mono px-3 py-1 bg-white border border-slate-200 rounded-xl">1</span>
+              <span id="currentPageNum"
+                class="font-bold text-slate-900 font-mono px-3 py-1 bg-white border border-slate-200 rounded-xl">1</span>
               <button id="nextPageBtn" onclick="changePage(1)"
                 class="px-4 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1 shadow-2xs">
                 Next <i data-lucide="chevron-right" class="w-4 h-4"></i>
@@ -614,13 +625,15 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
     <!-- Modal 1: View Full Contestant Dossier -->
     <div id="viewDossierModal"
       class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-      <div class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
+      <div
+        class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
         <div class="bg-slate-900 text-white p-4 sm:p-5 flex items-center justify-between shrink-0">
           <div class="flex items-center gap-2.5">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
             <h3 class="font-heading font-bold text-base">Contestant Dossier</h3>
           </div>
-          <button onclick="closeModal('viewDossierModal')" class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition">
+          <button onclick="closeModal('viewDossierModal')"
+            class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
@@ -641,7 +654,8 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
     <!-- Modal 2: Edit Contestant Details -->
     <div id="editEntryModal"
       class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-      <div class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
+      <div
+        class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
         <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
           <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
@@ -652,7 +666,8 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
               <p class="text-[11px] text-slate-500">Update contestant details and status</p>
             </div>
           </div>
-          <button onclick="closeModal('editEntryModal')" class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
+          <button onclick="closeModal('editEntryModal')"
+            class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
@@ -687,8 +702,9 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                   class="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:border-red-600 focus:outline-none transition cursor-pointer">
                   <option value="male">👨 Male (Solo)</option>
                   <option value="female">👩 Female (Solo)</option>
-                  <option value="child">🧒 Child / Family</option>
-                  <option value="group">👥 Group Squad</option>
+                  <option value="kids">🧒 Kids</option>
+                  <option value="group_family">👥 Group / Family</option>
+                  <option value="voice_of_meridian">🎙️ Voice of Meridian</option>
                 </select>
               </div>
               <div>
@@ -731,7 +747,8 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
             </div>
           </div>
 
-          <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 shrink-0">
+          <div
+            class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 shrink-0">
             <button type="button" onclick="closeModal('editEntryModal')"
               class="h-10 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs sm:text-sm transition text-center min-w-[90px]">
               Cancel
@@ -748,7 +765,8 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
     <!-- Modal 3: Create Manual Contestant -->
     <div id="createEntryModal"
       class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-      <div class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
+      <div
+        class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
         <div
           class="p-4 sm:p-5 border-b border-slate-200 bg-gradient-to-r from-[#D8232A] to-[#B3181E] text-white flex items-center justify-between shrink-0">
           <div class="flex items-center gap-2.5">
@@ -760,12 +778,14 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
               <p class="text-[11px] text-red-100">Manual counter/parlour registration</p>
             </div>
           </div>
-          <button onclick="closeModal('createEntryModal')" class="w-8 h-8 rounded-xl flex items-center justify-center text-red-200 hover:text-white hover:bg-white/10 transition">
+          <button onclick="closeModal('createEntryModal')"
+            class="w-8 h-8 rounded-xl flex items-center justify-center text-red-200 hover:text-white hover:bg-white/10 transition">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
 
-        <form id="createEntryForm" onsubmit="handleCreateSubmit(event)" class="flex flex-col flex-1 overflow-hidden min-h-0">
+        <form id="createEntryForm" onsubmit="handleCreateSubmit(event)"
+          class="flex flex-col flex-1 overflow-hidden min-h-0">
           <div class="p-5 sm:p-6 space-y-4 text-xs overflow-y-auto custom-scrollbar flex-1">
             <div>
               <label class="block font-bold text-slate-700 mb-1.5">Full Name *</label>
@@ -793,8 +813,9 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                   class="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:border-red-600 focus:outline-none transition cursor-pointer">
                   <option value="male">👨 Male (Solo)</option>
                   <option value="female">👩 Female (Solo)</option>
-                  <option value="child">🧒 Child / Family</option>
-                  <option value="group">👥 Group Squad</option>
+                  <option value="kids">🧒 Kids</option>
+                  <option value="group_family">👥 Group / Family</option>
+                  <option value="voice_of_meridian">🎙️ Voice of Meridian</option>
                 </select>
               </div>
               <div>
@@ -841,7 +862,8 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
             </div>
           </div>
 
-          <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 shrink-0">
+          <div
+            class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 shrink-0">
             <button type="button" onclick="closeModal('createEntryModal')"
               class="h-10 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs sm:text-sm transition text-center min-w-[90px]">
               Cancel
@@ -860,7 +882,8 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
     <!-- ========================================================= -->
     <div id="changePasswordModal"
       class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
-      <div class="bg-white rounded-3xl max-w-md w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
+      <div
+        class="bg-white rounded-3xl max-w-md w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
         <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
           <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
@@ -878,7 +901,8 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
           </button>
         </div>
 
-        <form id="changePasswordForm" onsubmit="handleChangePasswordSubmit(event)" class="flex flex-col flex-1 overflow-hidden min-h-0">
+        <form id="changePasswordForm" onsubmit="handleChangePasswordSubmit(event)"
+          class="flex flex-col flex-1 overflow-hidden min-h-0">
           <div class="p-5 sm:p-6 space-y-4 text-xs overflow-y-auto custom-scrollbar flex-1">
             <div id="pwdAlertBox" class="hidden p-3 rounded-xl text-xs font-semibold"></div>
 
@@ -907,7 +931,8 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
             </div>
           </div>
 
-          <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 shrink-0">
+          <div
+            class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 shrink-0">
             <button type="button" onclick="closeModal('changePasswordModal')"
               class="h-10 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs sm:text-sm transition text-center min-w-[90px]">
               Cancel
@@ -954,8 +979,17 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
             document.getElementById('statTotalCount').textContent = s.total;
             document.getElementById('statMaleCount').textContent = s.categories.male || 0;
             document.getElementById('statFemaleCount').textContent = s.categories.female || 0;
-            document.getElementById('statChildCount').textContent = s.categories.child || 0;
-            document.getElementById('statGroupCount').textContent = s.categories.group || 0;
+            const kidsTotal = (s.categories.kids || 0) + (s.categories.child || 0);
+            const groupTotal = (s.categories.group_family || 0) + (s.categories.group || 0);
+            if (document.getElementById('statKidsCount')) {
+              document.getElementById('statKidsCount').textContent = kidsTotal;
+            }
+            if (document.getElementById('statGroupCount')) {
+              document.getElementById('statGroupCount').textContent = groupTotal;
+            }
+            if (document.getElementById('statVoiceCount')) {
+              document.getElementById('statVoiceCount').textContent = s.categories.voice_of_meridian || 0;
+            }
             document.getElementById('statShortlistedCount').textContent = s.shortlisted || 0;
             document.getElementById('statWinnersCount').textContent = s.winners || 0;
             if (document.getElementById('statTodayCount')) {
@@ -1093,8 +1127,21 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
         const catIcons = {
           'male': '👨',
           'female': '👩',
+          'kids': '🧒',
           'child': '🧒',
-          'group': '👥'
+          'group': '👥',
+          'group_family': '👥',
+          'voice_of_meridian': '🎙️'
+        };
+
+        const catDisplayNames = {
+          'male': 'Male',
+          'female': 'Female',
+          'kids': 'Kids',
+          'child': 'Kids',
+          'group': 'Group / Family',
+          'group_family': 'Group / Family',
+          'voice_of_meridian': 'Voice of Meridian'
         };
 
         const statusStyles = {
@@ -1130,9 +1177,9 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
             </td>
 
             <td class="p-3.5 whitespace-nowrap">
-              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${row.category === 'voice_of_meridian' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-slate-100 text-slate-800 border border-slate-200'}">
                 <span>${catIcons[row.category] || '🍦'}</span>
-                <span class="capitalize">${escapeHtml(row.category || 'male')}</span>
+                <span>${escapeHtml(catDisplayNames[row.category] || row.category || 'male')}</span>
               </span>
             </td>
 
@@ -1191,9 +1238,9 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                   <input type="checkbox" onchange="toggleSelectRow(${row.id})" ${isChecked ? 'checked' : ''} class="w-4.5 h-4.5 row-checkbox rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
                   <span class="font-mono font-bold text-sm text-[#D8232A]">${escapeHtml(row.entry_code || '#M-2026')}</span>
                 </div>
-                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${row.category === 'voice_of_meridian' ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-slate-100 text-slate-800 border border-slate-200'}">
                   <span>${catIcons[row.category] || '🍦'}</span>
-                  <span class="capitalize">${escapeHtml(row.category || 'male')}</span>
+                  <span>${escapeHtml(catDisplayNames[row.category] || row.category || 'male')}</span>
                 </span>
               </div>
 
@@ -1399,7 +1446,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
         <div class="grid grid-cols-2 gap-3">
           <div class="p-2.5 bg-slate-50 rounded-xl">
             <div class="text-[11px] text-slate-500 uppercase font-semibold">Category</div>
-            <div class="font-bold text-slate-800 mt-0.5 capitalize">${escapeHtml(r.category || '-')}</div>
+            <div class="font-bold text-slate-800 mt-0.5">${catIcons[r.category] || '🍦'} ${escapeHtml(catDisplayNames[r.category] || r.category || '-')}</div>
           </div>
           <div class="p-2.5 bg-slate-50 rounded-xl">
             <div class="text-[11px] text-slate-500 uppercase font-semibold">Location & Store Code</div>
@@ -1429,11 +1476,16 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
         const r = currentEntriesCache.find(x => x.id === id);
         if (!r) return;
 
+        let normalizedCat = r.category || 'male';
+        if (normalizedCat === 'child') normalizedCat = 'kids';
+        if (normalizedCat === 'group' || normalizedCat === 'family') normalizedCat = 'group_family';
+        if (normalizedCat === 'voice') normalizedCat = 'voice_of_meridian';
+
         document.getElementById('editEntryId').value = r.id;
         document.getElementById('editFullName').value = r.full_name || '';
         document.getElementById('editMobile').value = r.mobile_number || '';
         document.getElementById('editEmail').value = r.email_address || '';
-        document.getElementById('editCategory').value = r.category || 'male';
+        document.getElementById('editCategory').value = normalizedCat;
         document.getElementById('editStatus').value = r.status || 'registered';
         document.getElementById('editCity').value = r.city || 'pune';
         document.getElementById('editStoreCode').value = r.store_code || 'GENERAL';

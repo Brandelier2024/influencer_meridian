@@ -64,8 +64,7 @@ function getDbConnection()
             $pdoInstance = $pdo;
             return $pdoInstance;
         } catch (PDOException $e) {
-            // MySQL unavailable locally (e.g. local testing), fall through to local SQLite database
-            error_log("MySQL Notice: " . $e->getMessage() . " - switching to local SQLite database for testing.");
+            // MySQL unavailable locally (e.g. local testing), fall through to local SQLite database without breaking JSON APIs
         }
     }
 
@@ -106,7 +105,7 @@ function initDatabaseTable(PDO $pdo, string $driver)
             `full_name` VARCHAR(150) NOT NULL,
             `mobile_number` VARCHAR(20) NOT NULL,
             `email_address` VARCHAR(150) NOT NULL,
-            `category` ENUM('male', 'female', 'child', 'group') NOT NULL DEFAULT 'male',
+            `category` VARCHAR(50) NOT NULL DEFAULT 'male',
             `video_url` VARCHAR(500) NULL,
             `city` VARCHAR(80) NOT NULL DEFAULT 'pune',
             `store_code` VARCHAR(50) NOT NULL DEFAULT 'GENERAL',
@@ -139,6 +138,11 @@ function initDatabaseTable(PDO $pdo, string $driver)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
         ";
         $pdo->exec($sql);
+        try {
+            $pdo->exec("ALTER TABLE `meridian_contest_entries` MODIFY COLUMN `category` VARCHAR(50) NOT NULL DEFAULT 'male'");
+        } catch (\Throwable $e) {
+            // Already modified or no permission
+        }
     } else {
         $sql = "
         CREATE TABLE IF NOT EXISTS `meridian_contest_entries` (

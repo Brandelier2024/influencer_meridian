@@ -632,6 +632,11 @@
       border-color: #E9D5FF;
     }
 
+    .cat-voice-theme {
+      background: linear-gradient(180deg, #FFFFFF 50%, #FEF2F2 100%);
+      border-color: #FECACA;
+    }
+
     .cat-number-badge {
       position: absolute;
       top: 18px;
@@ -653,6 +658,7 @@
     .cat-female-theme .cat-number-badge { color: #E11D48; }
     .cat-child-theme .cat-number-badge { color: #16A34A; }
     .cat-group-theme .cat-number-badge { color: #9333EA; }
+    .cat-voice-theme .cat-number-badge { color: #D8232A; }
 
     .cat-image-wrapper {
       height: 160px;
@@ -1254,8 +1260,20 @@
 
     .category-pills-row {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 8px;
+    }
+
+    @media (max-width: 768px) {
+      .category-pills-row {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .category-pills-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     .category-pill-btn {
@@ -1288,6 +1306,58 @@
       background: var(--brand-red-subtle);
       color: var(--brand-red);
       box-shadow: 0 2px 8px var(--brand-red-glow);
+    }
+
+    .category-guidance-callout {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: linear-gradient(135deg, #FFF7ED 0%, #FEF2F2 100%);
+      border: 1.5px solid #FECDD3;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 0.82rem;
+      transition: all 0.25s ease;
+      box-shadow: 0 2px 8px rgba(216, 35, 42, 0.05);
+    }
+
+    .guidance-icon {
+      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: #D8232A;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 1px;
+      box-shadow: 0 4px 10px -2px rgba(216, 35, 42, 0.35);
+    }
+
+    .guidance-text {
+      line-height: 1.45;
+      flex: 1;
+    }
+
+    .guidance-title {
+      font-weight: 800;
+      color: #991B1B;
+      display: block;
+      margin-bottom: 2px;
+      font-size: 0.82rem;
+    }
+
+    .guidance-desc {
+      color: #374151;
+      font-weight: 500;
+      font-size: 0.82rem;
+    }
+
+    .guidance-desc strong {
+      color: #D8232A;
+      font-weight: 700;
     }
 
     /* Success Modal */
@@ -1830,21 +1900,21 @@
       <div class="ticker-item">Enjoy Meridian <div class="ticker-dot"></div></div>
       <div class="ticker-item">Create Content <div class="ticker-dot"></div></div>
       <div class="ticker-item">Become an Ambassador <div class="ticker-dot"></div></div>
-      <div class="ticker-item">4 Categories <div class="ticker-dot"></div></div>
+      <div class="ticker-item">5 Categories <div class="ticker-dot"></div></div>
       <div class="ticker-item">Free Ice Cream For A Year <div class="ticker-dot"></div></div>
     </div>
   </div>
 
-  <!-- SECTION: FOUR WAYS TO PARTICIPATE (PDF Page 3) -->
+  <!-- SECTION: FIVE WAYS TO PARTICIPATE (PDF Page 3) -->
   <section class="categories-section" id="categories">
     <div class="container">
       <div class="section-head reveal-card">
         <div class="pill-badge" style="background: #FEF3C7; color: #D97706; border-color: #FDE68A;">
-          <i data-lucide="layers" style="width: 14px; height: 14px;"></i> Four Ways to Participate
+          <i data-lucide="layers" style="width: 14px; height: 14px;"></i> Five Ways to Participate
         </div>
         <h2 class="section-title">Choose Your Category</h2>
         <p class="section-desc">
-          Whether you are entering solo, with your family, or with your crew — there's a dedicated spotlight and winner chosen in every category!
+          Whether you are entering solo, with your kids, your family, or your squad — or showcasing your singing talent — there's a dedicated spotlight and winner chosen in every category!
         </p>
       </div>
 
@@ -1858,6 +1928,10 @@
           </div>
           <h3 class="cat-card-title">Male Category</h3>
           <p class="cat-card-desc">Individual male participants sharing honest flavor reviews, parlour visits, and fun reactions.</p>
+          <div style="font-size: 0.76rem; color: #C2410C; background: #FFF7ED; padding: 7px 10px; border-radius: 8px; border: 1px solid #FFEDD5; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="music" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
+            <span>You can use the official Meridian music reel or jingle!</span>
+          </div>
           <ul class="cat-criteria-list">
             <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Solo creators & enthusiasts</li>
             <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Creative reels & taste tests</li>
@@ -1876,6 +1950,10 @@
           </div>
           <h3 class="cat-card-title">Female Category</h3>
           <p class="cat-card-desc">Individual female participants capturing aesthetic parlour moments and genuine scoop joy.</p>
+          <div style="font-size: 0.76rem; color: #BE185D; background: #FDF2F8; padding: 7px 10px; border-radius: 8px; border: 1px solid #FCE7F3; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="music" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
+            <span>You can use the official Meridian music reel or jingle!</span>
+          </div>
           <ul class="cat-criteria-list">
             <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Solo creators & foodies</li>
             <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Aesthetic reels & flavour vibes</li>
@@ -1886,39 +1964,71 @@
           </button>
         </div>
 
-        <!-- Category 3: Child & Family -->
+        <!-- Category 3: Kids -->
         <div class="contest-cat-card cat-child-theme reveal-card stagger-3">
           <div class="cat-number-badge">3</div>
           <div class="cat-image-wrapper">
-            <img src="assets/clean/category-child.png" alt="Child Category">
+            <img src="assets/clean/category-child.png" alt="Kids Category">
           </div>
-          <h3 class="cat-card-title">Child & Family</h3>
-          <p class="cat-card-desc">Families, parents, and kids sharing heartwarming bonding moments over scoops and sundaes.</p>
+          <h3 class="cat-card-title">Kids Category</h3>
+          <p class="cat-card-desc">Parents & guardians capturing heartwarming ice cream smiles, fun expressions, and sweet treats.</p>
+          <div style="font-size: 0.76rem; color: #15803D; background: #F0FDF4; padding: 7px 10px; border-radius: 8px; border: 1px solid #DCFCE7; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="music" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
+            <span>You can use the official Meridian music reel or jingle!</span>
+          </div>
           <ul class="cat-criteria-list">
             <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Kids with parents or siblings</li>
             <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Weekend parlour treat stories</li>
-            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> 1 Official Ambassador Family</li>
+            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> 1 Official Ambassador Kid/Family</li>
           </ul>
-          <button type="button" class="btn btn-secondary" onclick="prefillAndScrollCategory('child')" style="width: 100%; font-size: 0.88rem; padding: 10px;">
-            Select Family Category &rarr;
+          <button type="button" class="btn btn-secondary" onclick="prefillAndScrollCategory('kids')" style="width: 100%; font-size: 0.88rem; padding: 10px;">
+            Select Kids Category &rarr;
           </button>
         </div>
 
-        <!-- Category 4: Group -->
+        <!-- Category 4: Group / Family -->
         <div class="contest-cat-card cat-group-theme reveal-card stagger-4">
           <div class="cat-number-badge">4</div>
           <div class="cat-image-wrapper">
-            <img src="assets/clean/category-group.png" alt="Group Category">
+            <img src="assets/clean/category-group.png" alt="Group and Family Category">
           </div>
-          <h3 class="cat-card-title">Group Category</h3>
-          <p class="cat-card-desc">Dance groups, college squads, bands, and sports teams bringing coordinated energy.</p>
+          <h3 class="cat-card-title">Group / Family</h3>
+          <p class="cat-card-desc">Friends squads, family reunions, college crews, or teams sharing ice cream joy together.</p>
+          <div style="font-size: 0.76rem; color: #7E22CE; background: #FAF5FF; padding: 7px 10px; border-radius: 8px; border: 1px solid #F3E8FF; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="music" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
+            <span>You can use the official Meridian music reel or jingle!</span>
+          </div>
           <ul class="cat-criteria-list">
-            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Groups of 2 or more friends</li>
-            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Group choreography, skits & cheers</li>
+            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Groups of 2 or more people</li>
+            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Coordinated skits, cheers & fun</li>
             <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> 1 Official Ambassador Group</li>
           </ul>
-          <button type="button" class="btn btn-secondary" onclick="prefillAndScrollCategory('group')" style="width: 100%; font-size: 0.88rem; padding: 10px;">
-            Select Group Category &rarr;
+          <button type="button" class="btn btn-secondary" onclick="prefillAndScrollCategory('group_family')" style="width: 100%; font-size: 0.88rem; padding: 10px;">
+            Select Group / Family &rarr;
+          </button>
+        </div>
+
+        <!-- Category 5: Voice of Meridian -->
+        <div class="contest-cat-card cat-voice-theme reveal-card stagger-5">
+          <div class="cat-number-badge">5</div>
+          <div class="cat-image-wrapper" style="background: radial-gradient(circle, #FEE2E2 0%, #FFFFFF 70%); border-radius: 16px;">
+            <div style="width: 88px; height: 88px; border-radius: 50%; background: #D8232A; display: flex; align-items: center; justify-content: center; color: #ffffff; box-shadow: 0 10px 25px -4px rgba(216, 35, 42, 0.4);">
+              <i data-lucide="mic" style="width: 44px; height: 44px;"></i>
+            </div>
+          </div>
+          <h3 class="cat-card-title">Voice of Meridian</h3>
+          <p class="cat-card-desc">Singers, vocalists, and music creators performing the Meridian jingle or creating acoustic reels.</p>
+          <div style="font-size: 0.76rem; color: #B91C1C; background: #FEF2F2; padding: 7px 10px; border-radius: 8px; border: 1px solid #FEE2E2; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+            <i data-lucide="mic-2" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
+            <span>Sing our jingle or use the official music reel audio!</span>
+          </div>
+          <ul class="cat-criteria-list">
+            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Sing the iconic Meridian jingle</li>
+            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Original musical covers & reels</li>
+            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> 1 Official "Voice of Meridian" Crown</li>
+          </ul>
+          <button type="button" class="btn btn-secondary" onclick="prefillAndScrollCategory('voice_of_meridian')" style="width: 100%; font-size: 0.88rem; padding: 10px;">
+            Select Voice of Meridian &rarr;
           </button>
         </div>
 
@@ -2237,7 +2347,7 @@
         </div>
         <h2 class="section-title">Brand Ambassador Perks</h2>
         <p class="section-desc">
-          Four winning creators (one in each category) will represent Meridian Ice Cream nationwide!
+          Five winning creators (one in each of the 5 categories) will represent Meridian Ice Cream nationwide!
         </p>
       </div>
 
@@ -2362,7 +2472,7 @@
               </div>
             </div>
 
-            <!-- Category Picker -->
+            <!-- Category Picker (5 Categories) -->
             <div class="form-group-item">
               <label class="form-label-title">
                 Select Your Category <span style="color: var(--brand-red);">*</span>
@@ -2378,16 +2488,32 @@
                   <i data-lucide="smile" style="width: 16px; height: 16px;"></i>
                   Female
                 </label>
-                <label class="category-pill-btn" id="pill-child">
-                  <input type="radio" name="category" value="child" onchange="handleCategoryChange('child')">
-                  <i data-lucide="heart" style="width: 16px; height: 16px;"></i>
-                  Family
+                <label class="category-pill-btn" id="pill-kids">
+                  <input type="radio" name="category" value="kids" onchange="handleCategoryChange('kids')">
+                  <i data-lucide="baby" style="width: 16px; height: 16px;"></i>
+                  Kids
                 </label>
-                <label class="category-pill-btn" id="pill-group">
-                  <input type="radio" name="category" value="group" onchange="handleCategoryChange('group')">
+                <label class="category-pill-btn" id="pill-group_family">
+                  <input type="radio" name="category" value="group_family" onchange="handleCategoryChange('group_family')">
                   <i data-lucide="users" style="width: 16px; height: 16px;"></i>
-                  Group
+                  Group / Family
                 </label>
+                <label class="category-pill-btn" id="pill-voice_of_meridian">
+                  <input type="radio" name="category" value="voice_of_meridian" onchange="handleCategoryChange('voice_of_meridian')">
+                  <i data-lucide="mic" style="width: 16px; height: 16px;"></i>
+                  Voice of Meridian
+                </label>
+              </div>
+
+              <!-- Dynamic 1-Line Description Callout (Audio & Jingle Guidance) -->
+              <div id="categoryGuidanceBox" class="category-guidance-callout">
+                <div class="guidance-icon" id="guidanceIconBox">
+                  <i data-lucide="music-2" id="guidanceIcon" style="width: 16px; height: 16px;"></i>
+                </div>
+                <div class="guidance-text">
+                  <span class="guidance-title" id="guidanceTitle">👨 Male Solo:</span>
+                  <span class="guidance-desc" id="guidanceDesc">Record your flavour reviews or parlour visit — <strong>you can use your official Meridian music reel or sing our jingle for Meridian!</strong></span>
+                </div>
               </div>
             </div>
 
@@ -2612,7 +2738,7 @@
           <h4 class="footer-col-title">Contest</h4>
           <ul class="footer-links-list">
             <li><a href="#about">About Campaign</a></li>
-            <li><a href="#categories">Four Categories</a></li>
+            <li><a href="#categories">Five Categories</a></li>
             <li><a href="#journey">User Journey</a></li>
             <li><a href="#steps">3 Simple Steps</a></li>
             <li><a href="#register">Register Online</a></li>
@@ -2625,8 +2751,9 @@
           <ul class="footer-links-list">
             <li><a href="#categories" onclick="prefillAndScrollCategory('male')">Male Category</a></li>
             <li><a href="#categories" onclick="prefillAndScrollCategory('female')">Female Category</a></li>
-            <li><a href="#categories" onclick="prefillAndScrollCategory('child')">Child & Family</a></li>
-            <li><a href="#categories" onclick="prefillAndScrollCategory('group')">Group Squads</a></li>
+            <li><a href="#categories" onclick="prefillAndScrollCategory('kids')">Kids Category</a></li>
+            <li><a href="#categories" onclick="prefillAndScrollCategory('group_family')">Group & Family</a></li>
+            <li><a href="#categories" onclick="prefillAndScrollCategory('voice_of_meridian')">Voice of Meridian</a></li>
           </ul>
         </div>
 
@@ -2739,6 +2866,10 @@
 
     // Category Prefill & Smooth Scroll
     function prefillAndScrollCategory(catKey) {
+      if (catKey === 'child') catKey = 'kids';
+      if (catKey === 'group' || catKey === 'family') catKey = 'group_family';
+      if (catKey === 'voice') catKey = 'voice_of_meridian';
+
       handleCategoryChange(catKey);
       const radio = document.querySelector(`input[name="category"][value="${catKey}"]`);
       if (radio) radio.checked = true;
@@ -2750,20 +2881,60 @@
     }
 
     function handleCategoryChange(catKey) {
+      // Normalize aliases
+      if (catKey === 'child') catKey = 'kids';
+      if (catKey === 'group' || catKey === 'family') catKey = 'group_family';
+      if (catKey === 'voice') catKey = 'voice_of_meridian';
+
       document.querySelectorAll('.category-pill-btn').forEach(btn => btn.classList.remove('active'));
       const activePill = document.getElementById(`pill-${catKey}`);
       if (activePill) activePill.classList.add('active');
 
+      const radio = document.querySelector(`input[name="category"][value="${catKey}"]`);
+      if (radio) radio.checked = true;
+
       const catLabels = {
         'male': 'Male Category (Solo Participant)',
         'female': 'Female Category (Solo Participant)',
-        'child': 'Child & Family Category',
-        'group': 'Group Category (Crews & Squads)'
+        'kids': 'Kids Category (Joyful Treats & Smiles)',
+        'group_family': 'Group / Family Category (Squad & Crew)',
+        'voice_of_meridian': 'Voice of Meridian (Jingle & Music)'
       };
 
       const liveCat = document.getElementById('liveCategoryPreview');
       if (liveCat) {
         liveCat.textContent = catLabels[catKey] || 'Contestant Category';
+      }
+
+      // One-line dynamic description for using Meridian music reel or jingle
+      const guidanceData = {
+        'male': {
+          title: '👨 Male Solo Creator:',
+          desc: 'Share your flavour reviews or parlour visits — <strong>you can use your official Meridian music reel or sing our jingle for Meridian!</strong>'
+        },
+        'female': {
+          title: '👩 Female Solo Creator:',
+          desc: 'Showcase your aesthetic flavour moments & parlour vibes — <strong>you can use your official Meridian music reel or sing our jingle for Meridian!</strong>'
+        },
+        'kids': {
+          title: '🧒 Kids Category:',
+          desc: 'Capture sweet smiles, first scoop treats & joyful family moments — <strong>you can use your official Meridian music reel or jingle for Meridian!</strong>'
+        },
+        'group_family': {
+          title: '👥 Group / Family Category:',
+          desc: 'Celebrate together with your crew, friends, or family — <strong>you can use your official Meridian music reel or sing the jingle for Meridian!</strong>'
+        },
+        'voice_of_meridian': {
+          title: '🎙️ Voice of Meridian:',
+          desc: 'Showcase your singing talent or musical cover — <strong>sing the official Meridian jingle or perform your melody using our official music reel for Meridian!</strong>'
+        }
+      };
+
+      const gTitle = document.getElementById('guidanceTitle');
+      const gDesc = document.getElementById('guidanceDesc');
+      if (gTitle && gDesc && guidanceData[catKey]) {
+        gTitle.textContent = guidanceData[catKey].title;
+        gDesc.innerHTML = guidanceData[catKey].desc;
       }
     }
 

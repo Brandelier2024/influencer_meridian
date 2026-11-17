@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `meridian_contest_entries` (
   `full_name` VARCHAR(150) NOT NULL COMMENT 'Contestant or team lead name',
   `mobile_number` VARCHAR(20) NOT NULL COMMENT '10-digit Indian mobile number',
   `email_address` VARCHAR(150) NOT NULL COMMENT 'Notification email',
-  `category` ENUM('male', 'female', 'child', 'group') NOT NULL DEFAULT 'male' COMMENT 'Contest bracket',
+  `category` VARCHAR(50) NOT NULL DEFAULT 'male' COMMENT 'Contest category: male, female, kids, group_family, voice_of_meridian',
   `video_url` VARCHAR(500) NULL DEFAULT NULL COMMENT 'Instagram Reel / YouTube Shorts URL',
   `city` VARCHAR(80) NOT NULL DEFAULT 'pune' COMMENT 'Nearest parlour city (Mumbai, Pune, Nashik, etc.)',
   `store_code` VARCHAR(50) NOT NULL DEFAULT 'GENERAL' COMMENT 'Parlour code for vendor attribution (e.g. PUN-FC-01)',

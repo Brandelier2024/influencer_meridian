@@ -232,7 +232,15 @@ if ($action === 'get_stats') {
         'today'           => 0,
         'shortlisted'     => 0,
         'winners'         => 0,
-        'categories'      => ['male' => 0, 'female' => 0, 'child' => 0, 'group' => 0],
+        'categories'      => [
+            'male'              => 0,
+            'female'            => 0,
+            'kids'              => 0,
+            'group_family'      => 0,
+            'voice_of_meridian' => 0,
+            'child'             => 0,
+            'group'             => 0
+        ],
         'statuses'        => ['registered' => 0, 'under_review' => 0, 'shortlisted' => 0, 'winner' => 0, 'rejected' => 0],
         'cities'          => [],
         'active_parlours' => 0,
@@ -257,8 +265,15 @@ if ($action === 'get_stats') {
             $stmt = $pdo->query("SELECT category, COUNT(*) as cnt FROM meridian_contest_entries GROUP BY category");
             while ($row = $stmt->fetch()) {
                 $cat = $row['category'];
+                $cCnt = (int)$row['cnt'];
                 if (isset($stats['categories'][$cat])) {
-                    $stats['categories'][$cat] = (int)$row['cnt'];
+                    $stats['categories'][$cat] += $cCnt;
+                }
+                // Group legacy counts into canonical keys
+                if ($cat === 'child') {
+                    $stats['categories']['kids'] += $cCnt;
+                } elseif ($cat === 'group' || $cat === 'family') {
+                    $stats['categories']['group_family'] += $cCnt;
                 }
             }
 
@@ -307,9 +322,15 @@ if ($action === 'get_entries') {
                 $params[':s'] = '%' . $search . '%';
             }
 
-            if (!empty($category) && in_array($category, ['male', 'female', 'child', 'group'], true)) {
-                $whereClauses[] = "category = :cat";
-                $params[':cat'] = $category;
+            if (!empty($category)) {
+                if ($category === 'kids' || $category === 'child') {
+                    $whereClauses[] = "(category = 'kids' OR category = 'child')";
+                } elseif ($category === 'group_family' || $category === 'group' || $category === 'family') {
+                    $whereClauses[] = "(category = 'group_family' OR category = 'group' OR category = 'family')";
+                } elseif (in_array($category, ['male', 'female', 'voice_of_meridian'], true)) {
+                    $whereClauses[] = "category = :cat";
+                    $params[':cat'] = $category;
+                }
             }
 
             if (!empty($status) && in_array($status, ['registered', 'under_review', 'shortlisted', 'winner', 'rejected'], true)) {
@@ -430,6 +451,12 @@ if ($action === 'update_entry') {
     $mobile      = preg_replace('/[^0-9]/', '', $data['mobile_number'] ?? '');
     $email       = mb_substr(trim($data['email_address'] ?? ''), 0, 150);
     $category    = strtolower(trim($data['category'] ?? 'male'));
+    if ($category === 'child') $category = 'kids';
+    if ($category === 'group' || $category === 'family' || $category === 'group/family') $category = 'group_family';
+    if ($category === 'voice' || $category === 'voice-of-meridian') $category = 'voice_of_meridian';
+    if (!in_array($category, ['male', 'female', 'kids', 'group_family', 'voice_of_meridian'], true)) {
+        $category = 'male';
+    }
     $videoUrl    = mb_substr(trim($data['video_url'] ?? ''), 0, 500);
     $city        = mb_substr(trim($data['city'] ?? 'pune'), 0, 80);
     $storeCode   = mb_substr(trim($data['store_code'] ?? 'GENERAL'), 0, 50);
@@ -554,6 +581,12 @@ if ($action === 'create_entry') {
     $mobile      = preg_replace('/[^0-9]/', '', $data['mobile_number'] ?? '');
     $email       = mb_substr(trim($data['email_address'] ?? ''), 0, 150);
     $category    = strtolower(trim($data['category'] ?? 'male'));
+    if ($category === 'child') $category = 'kids';
+    if ($category === 'group' || $category === 'family' || $category === 'group/family') $category = 'group_family';
+    if ($category === 'voice' || $category === 'voice-of-meridian') $category = 'voice_of_meridian';
+    if (!in_array($category, ['male', 'female', 'kids', 'group_family', 'voice_of_meridian'], true)) {
+        $category = 'male';
+    }
     $videoUrl    = mb_substr(trim($data['video_url'] ?? ''), 0, 500);
     $city        = mb_substr(trim($data['city'] ?? 'pune'), 0, 80);
     $storeCode   = mb_substr(trim($data['store_code'] ?? 'GENERAL'), 0, 50);
@@ -632,9 +665,15 @@ if ($action === 'export_csv') {
                 $whereClauses[] = "(full_name LIKE :s OR entry_code LIKE :s OR mobile_number LIKE :s OR email_address LIKE :s OR store_code LIKE :s)";
                 $params[':s'] = '%' . $search . '%';
             }
-            if (!empty($category) && in_array($category, ['male', 'female', 'child', 'group'], true)) {
-                $whereClauses[] = "category = :cat";
-                $params[':cat'] = $category;
+            if (!empty($category)) {
+                if ($category === 'kids' || $category === 'child') {
+                    $whereClauses[] = "(category = 'kids' OR category = 'child')";
+                } elseif ($category === 'group_family' || $category === 'group' || $category === 'family') {
+                    $whereClauses[] = "(category = 'group_family' OR category = 'group' OR category = 'family')";
+                } elseif (in_array($category, ['male', 'female', 'voice_of_meridian'], true)) {
+                    $whereClauses[] = "category = :cat";
+                    $params[':cat'] = $category;
+                }
             }
             if (!empty($status) && in_array($status, ['registered', 'under_review', 'shortlisted', 'winner', 'rejected'], true)) {
                 $whereClauses[] = "status = :st";

@@ -57,9 +57,15 @@ if ($pdo) {
     try {
         $sql = "SELECT id, entry_code, full_name, mobile_number, email_address, category, video_url, city, store_code, instagram_handle, status, created_at FROM meridian_contest_entries";
         $params = [];
-        if (!empty($categoryFilter) && in_array($categoryFilter, ['male', 'female', 'child', 'group'])) {
-            $sql .= " WHERE category = :category";
-            $params[':category'] = $categoryFilter;
+        if (!empty($categoryFilter)) {
+            if ($categoryFilter === 'kids' || $categoryFilter === 'child') {
+                $sql .= " WHERE (category = 'kids' OR category = 'child')";
+            } elseif ($categoryFilter === 'group_family' || $categoryFilter === 'group' || $categoryFilter === 'family') {
+                $sql .= " WHERE (category = 'group_family' OR category = 'group' OR category = 'family')";
+            } elseif (in_array($categoryFilter, ['male', 'female', 'voice_of_meridian'], true)) {
+                $sql .= " WHERE category = :category";
+                $params[':category'] = $categoryFilter;
+            }
         }
         $sql .= " ORDER BY id DESC";
 

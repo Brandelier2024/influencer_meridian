@@ -97,7 +97,16 @@ if (empty($emailAddress) || !filter_var($emailAddress, FILTER_VALIDATE_EMAIL)) {
     $errors[] = 'A valid email address is required.';
 }
 
-if (!in_array($category, ['male', 'female', 'child', 'group'], true)) {
+// Normalize categories & aliases to canonical 5 categories
+if ($category === 'child') {
+    $category = 'kids';
+} elseif ($category === 'group' || $category === 'family' || $category === 'group/family') {
+    $category = 'group_family';
+} elseif ($category === 'voice' || $category === 'voice-of-meridian') {
+    $category = 'voice_of_meridian';
+}
+
+if (!in_array($category, ['male', 'female', 'kids', 'group_family', 'voice_of_meridian'], true)) {
     $category = 'male';
 }
 

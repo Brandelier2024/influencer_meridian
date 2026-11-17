@@ -70,7 +70,7 @@ $codeClean = <<<'PHP'
 require_once __DIR__ . '/api/config.php';
 $pdo = getDbConnection();
 if ($pdo) {
-    $pdo->exec("DELETE FROM meridian_contest_entries WHERE email_address LIKE '%.internal'");
+    $pdo->exec("DELETE FROM meridian_contest_entries WHERE email_address LIKE '%.internal%' OR email_address LIKE '%.test'");
 }
 PHP;
 runPhpSubprocess($codeClean);
@@ -688,6 +688,86 @@ $logoutRes = json_decode($res['stdout'], true);
 report("17. Superadmin Logout & Session Invalidation",
     ($logoutRes['success'] ?? false) === true,
     "Logout message: " . ($logoutRes['message'] ?? 'None')
+);
+
+// -------------------------------------------------------------
+// TEST 18: Five Contest Categories Verification
+// -------------------------------------------------------------
+// 1. Register Voice of Meridian entry
+$codeVoiceReg = <<<'PHP'
+$_SERVER['REQUEST_METHOD'] = 'POST';
+$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+$_SERVER['HTTP_USER_AGENT'] = 'Mozilla/5.0 VoiceTest/1.0';
+$_POST = [
+    'full_name'        => 'Aarav Voice Singer',
+    'mobile_number'    => '9822334455',
+    'email_address'    => 'aarav.voice@internal.test',
+    'category'         => 'voice_of_meridian',
+    'video_url'        => 'https://instagram.com/reel/meridian_jingle_singing',
+    'city'             => 'pune',
+    'terms_agreed'     => '1'
+];
+require __DIR__ . '/api/register.php';
+PHP;
+$resVoice = runPhpSubprocess($codeVoiceReg);
+$voiceRegData = json_decode($resVoice['stdout'], true);
+
+// 2. Insert kids and group_family, then query entries filtered by voice_of_meridian
+$codeFilterCheck = <<<'PHP'
+require_once __DIR__ . '/api/config.php';
+$pdo = getDbConnection();
+
+$codeKids = 'M-2026-' . random_int(100000, 999999);
+$codeGrp = 'M-2026-' . random_int(100000, 999999);
+
+$stmt = $pdo->prepare("
+    INSERT INTO meridian_contest_entries 
+    (entry_code, full_name, mobile_number, email_address, category, video_url, city, store_code, terms_agreed, status)
+    VALUES 
+    (:ck, 'Little Ananya', '9822334456', 'ananya.kids@internal.test', 'kids', 'https://instagram.com/reel/kids', 'mumbai', 'MUM-01', 1, 'registered'),
+    (:cg, 'Deshmukh Squad', '9822334457', 'squad@internal.test', 'group_family', 'https://instagram.com/reel/squad', 'nashik', 'NAS-01', 1, 'registered')
+");
+$stmt->execute([':ck' => $codeKids, ':cg' => $codeGrp]);
+
+session_start();
+$_SESSION['meridian_admin'] = true;
+$_SESSION['admin_user']     = 'admin';
+$_SESSION['csrf_token']     = 'test_token_123';
+$_SERVER['REQUEST_METHOD'] = 'GET';
+$_GET = ['action' => 'get_entries', 'category' => 'voice_of_meridian'];
+require __DIR__ . '/admin/api.php';
+PHP;
+$resFilter = runPhpSubprocess($codeFilterCheck);
+$filterData = json_decode($resFilter['stdout'], true);
+$voiceFound = count($filterData['entries'] ?? []);
+
+// 3. Query stats to verify all 5 category counts
+$codeStatsCheck = <<<'PHP'
+session_start();
+$_SESSION['meridian_admin'] = true;
+$_SESSION['admin_user']     = 'admin';
+$_SESSION['csrf_token']     = 'test_token_123';
+$_SERVER['REQUEST_METHOD'] = 'GET';
+$_GET = ['action' => 'get_stats'];
+require __DIR__ . '/admin/api.php';
+PHP;
+$resStats = runPhpSubprocess($codeStatsCheck);
+$statsData = json_decode($resStats['stdout'], true);
+$cats = $statsData['stats']['categories'] ?? [];
+
+$hasKids = ($cats['kids'] ?? 0) >= 1;
+$hasGroup = ($cats['group_family'] ?? 0) >= 1;
+$hasVoice = ($cats['voice_of_meridian'] ?? 0) >= 1;
+
+$catSuccess = ($voiceRegData['success'] ?? false) === true 
+    && $voiceFound >= 1
+    && $hasKids
+    && $hasGroup
+    && $hasVoice;
+
+report("18. Five Categories (Voice, Kids, Group/Family, Male, Female)",
+    $catSuccess,
+    "Voice of Meridian found: $voiceFound, Kids: " . ($hasKids ? 'YES' : 'NO') . ", Group/Family: " . ($hasGroup ? 'YES' : 'NO')
 );
 
 // Clean up test data after run
