@@ -239,61 +239,68 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
     <div class="flex-1 flex flex-col">
 
       <!-- Top Sticky Header -->
-      <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200/80 shadow-xs">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 shadow-2xs">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 min-h-16 py-2.5 sm:py-0 flex flex-wrap md:flex-nowrap items-center justify-between gap-3 sm:gap-4">
 
-          <!-- Brand & Title -->
-          <div class="flex items-center gap-3">
-            <a href="../index.html" target="_blank" title="View Landing Page"
+          <!-- Left: Brand & Title -->
+          <div class="flex items-center gap-3 shrink-0">
+            <a href="../index.html" target="_blank" title="View Public Landing Page"
               class="flex items-center gap-2 hover:opacity-85 transition">
-              <img src="../assets/official/meridian-logo-red.svg" alt="Meridian Ice Cream" class="h-9 w-auto">
+              <img src="../assets/official/meridian-logo-red.svg" alt="Meridian Ice Cream" class="h-8 sm:h-9 w-auto">
             </a>
             <div class="hidden sm:block h-6 w-px bg-slate-200"></div>
             <div class="hidden sm:flex items-center gap-2">
               <span class="font-heading font-black text-lg text-slate-800 leading-none">Superadmin Hub</span>
-              <span class="px-2.5 py-0.5 text-xs font-bold bg-red-100 text-[#D8232A] rounded-full">
-                Season 2026-2027
+              <span class="px-2.5 py-0.5 text-[11px] font-bold bg-red-100 text-[#D8232A] rounded-full">
+                2026-2027
               </span>
             </div>
           </div>
 
-          <!-- Center Status Pill -->
+          <!-- Center: Database Engine Status Pill -->
           <div
-            class="hidden md:flex items-center gap-2 px-3 py-1 bg-slate-50 border border-slate-200/80 rounded-full text-xs">
+            class="hidden lg:flex items-center gap-2 px-3 py-1 bg-slate-50 border border-slate-200/80 rounded-full text-xs">
             <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
             <span class="text-slate-600 font-medium" id="dbStatusIndicator">Hostinger MySQL Connected</span>
           </div>
 
-          <!-- Right User Actions -->
-          <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Right: User Actions & Utilities -->
+          <div class="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap justify-end ml-auto">
+            
+            <!-- Primary Action: Create Contestant -->
             <button onclick="openCreateModal()"
-              class="px-3.5 py-1.5 bg-[#D8232A] hover:bg-[#B3181E] text-white rounded-xl text-xs font-heading font-bold shadow-xs hover:shadow transition flex items-center gap-1.5">
+              class="h-9 sm:h-10 px-3.5 sm:px-4 bg-[#D8232A] hover:bg-[#B3181E] text-white rounded-xl text-xs sm:text-sm font-heading font-bold shadow-xs hover:shadow transition flex items-center gap-1.5 shrink-0">
               <i data-lucide="plus-circle" class="w-4 h-4"></i>
-              <span class="hidden sm:inline">New Contestant</span>
+              <span>New Contestant</span>
             </button>
 
-            <button onclick="exportFilteredCSV()"
-              class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold border border-slate-200 transition flex items-center gap-1.5"
-              title="Export Filtered CSV">
-              <i data-lucide="download" class="w-4 h-4"></i>
-              <span class="hidden md:inline">Export CSV</span>
-            </button>
+            <!-- Secondary Utilities Group with generous spacing -->
+            <div class="flex items-center gap-2 shrink-0">
+              <button onclick="exportFilteredCSV()"
+                class="h-9 sm:h-10 px-3 sm:px-3.5 bg-slate-50 hover:bg-slate-100 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold border border-slate-200 transition flex items-center gap-1.5"
+                title="Export Filtered CSV">
+                <i data-lucide="download" class="w-4 h-4 text-slate-500"></i>
+                <span class="hidden md:inline">Export</span>
+              </button>
 
-            <button onclick="refreshDashboard()"
-              class="p-2 text-slate-500 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition"
-              title="Refresh Live Data">
-              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-            </button>
+              <button onclick="refreshDashboard()"
+                class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition flex items-center justify-center shrink-0"
+                title="Refresh Live Data">
+                <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+              </button>
 
-            <a href="../index.html" target="_blank"
-              class="p-2 text-slate-500 hover:text-slate-800 rounded-xl hover:bg-slate-100 transition"
-              title="View Public Website">
-              <i data-lucide="external-link" class="w-4 h-4"></i>
-            </a>
+              <a href="../index.html" target="_blank"
+                class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition flex items-center justify-center shrink-0"
+                title="View Public Website">
+                <i data-lucide="external-link" class="w-4 h-4"></i>
+              </a>
+            </div>
 
-            <!-- Admin User Database Profile Button -->
+            <div class="hidden sm:block h-6 w-px bg-slate-200 mx-0.5"></div>
+
+            <!-- Superadmin Account & Password Button -->
             <button onclick="openChangePasswordModal()"
-              class="flex items-center gap-2 px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 border border-slate-200/80 rounded-xl transition text-left"
+              class="h-9 sm:h-10 flex items-center gap-2 px-2.5 sm:px-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition text-left shrink-0"
               title="Click to manage database password">
               <div
                 class="w-6 h-6 rounded-lg bg-[#D8232A] text-white flex items-center justify-center font-heading font-black text-[11px] shadow-xs">
@@ -301,17 +308,19 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
               </div>
               <div class="hidden xl:block text-[11px] leading-tight">
                 <span class="font-bold text-slate-800"><?= $adminUser ?></span>
-                <span class="text-[9px] text-emerald-600 font-semibold block uppercase tracking-wider">DB
-                  Superadmin</span>
+                <span class="text-[9px] text-emerald-600 font-semibold block uppercase tracking-wider">DB Superadmin</span>
               </div>
               <i data-lucide="key-round" class="w-3.5 h-3.5 text-slate-400"></i>
             </button>
 
+            <!-- Logout Button -->
             <button onclick="handleLogout()"
-              class="px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-xl border border-red-200 transition flex items-center gap-1">
+              class="h-9 sm:h-10 px-3 sm:px-3.5 text-xs sm:text-sm font-bold text-red-600 bg-red-50/60 hover:bg-red-100/80 border border-red-200 rounded-xl transition flex items-center gap-1.5 shrink-0"
+              title="Logout of dashboard">
               <i data-lucide="log-out" class="w-4 h-4"></i>
-              <span class="hidden sm:inline">Logout</span>
+              <span class="hidden md:inline">Logout</span>
             </button>
+
           </div>
 
         </div>
@@ -351,22 +360,22 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                 <i data-lucide="pie-chart" class="w-5 h-5"></i>
               </div>
             </div>
-            <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
-              <div class="p-1.5 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between">
-                <span class="text-slate-600">👨 Male:</span>
-                <strong class="font-bold text-slate-900" id="statMaleCount">0</strong>
+            <div class="mt-4 grid grid-cols-2 gap-2 text-xs">
+              <div class="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                <span class="text-slate-600 flex items-center gap-1.5 font-medium">👨 Male:</span>
+                <strong class="font-bold text-slate-900 font-mono text-sm" id="statMaleCount">0</strong>
               </div>
-              <div class="p-1.5 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between">
-                <span class="text-slate-600">👩 Female:</span>
-                <strong class="font-bold text-slate-900" id="statFemaleCount">0</strong>
+              <div class="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                <span class="text-slate-600 flex items-center gap-1.5 font-medium">👩 Female:</span>
+                <strong class="font-bold text-slate-900 font-mono text-sm" id="statFemaleCount">0</strong>
               </div>
-              <div class="p-1.5 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between">
-                <span class="text-slate-600">🧒 Family:</span>
-                <strong class="font-bold text-slate-900" id="statChildCount">0</strong>
+              <div class="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                <span class="text-slate-600 flex items-center gap-1.5 font-medium">🧒 Family:</span>
+                <strong class="font-bold text-slate-900 font-mono text-sm" id="statChildCount">0</strong>
               </div>
-              <div class="p-1.5 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-between">
-                <span class="text-slate-600">👥 Group:</span>
-                <strong class="font-bold text-slate-900" id="statGroupCount">0</strong>
+              <div class="p-2 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+                <span class="text-slate-600 flex items-center gap-1.5 font-medium">👥 Group:</span>
+                <strong class="font-bold text-slate-900 font-mono text-sm" id="statGroupCount">0</strong>
               </div>
             </div>
           </div>
@@ -418,38 +427,51 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
         </div>
 
         <!-- FILTER & CONTROL TOOLBAR -->
-        <div class="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-xs space-y-3">
+        <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs space-y-4">
 
-          <div class="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+          <!-- Row 1: Search Bar & Reset -->
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
 
             <!-- Search Bar -->
             <div class="relative flex-1">
-              <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3 text-slate-400"></i>
+              <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-3.5 text-slate-400"></i>
               <input type="text" id="searchInput" oninput="handleSearchInput()"
-                placeholder="Search by ticket code, name, phone, email, or parlour store code..."
-                class="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-red-600 focus:bg-white transition">
+                placeholder="Search by ticket code (#M-2026-...), name, mobile, email, parlour store code..."
+                class="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:border-red-600 focus:bg-white transition">
               <button id="clearSearchBtn" onclick="clearSearch()"
-                class="hidden absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+                class="hidden absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 p-1 rounded-lg">
                 <i data-lucide="x" class="w-4 h-4"></i>
               </button>
             </div>
 
-            <!-- Dropdown Filters -->
-            <div class="flex flex-wrap items-center gap-2">
+            <!-- Reset Filters Button with generous spacing -->
+            <button onclick="resetAllFilters()"
+              class="h-10 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs sm:text-sm font-bold border border-slate-200 transition flex items-center justify-center gap-2 shrink-0"
+              title="Reset all search queries and dropdown filters">
+              <i data-lucide="rotate-ccw" class="w-4 h-4 text-slate-500"></i>
+              <span>Reset Filters</span>
+            </button>
+          </div>
 
-              <!-- Category Filter -->
+          <!-- Row 2: 4 Modern Responsive Filter Dropdowns -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+
+            <!-- Category Filter -->
+            <div class="relative">
               <select id="filterCategory" onchange="loadEntries(1)"
-                class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-red-600 cursor-pointer">
+                class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none focus:border-red-600 focus:bg-white cursor-pointer transition">
                 <option value="">All Categories</option>
-                <option value="male">Male (Solo)</option>
-                <option value="female">Female (Solo)</option>
-                <option value="child">Child & Family</option>
-                <option value="group">Group Squad</option>
+                <option value="male">👨 Male (Solo)</option>
+                <option value="female">👩 Female (Solo)</option>
+                <option value="child">🧒 Child & Family</option>
+                <option value="group">👥 Group Squad</option>
               </select>
+            </div>
 
-              <!-- Status Filter -->
+            <!-- Status Filter -->
+            <div class="relative">
               <select id="filterStatus" onchange="loadEntries(1)"
-                class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-red-600 cursor-pointer">
+                class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none focus:border-red-600 focus:bg-white cursor-pointer transition">
                 <option value="">All Statuses</option>
                 <option value="registered">Registered</option>
                 <option value="under_review">Under Review</option>
@@ -457,10 +479,12 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                 <option value="winner">🏆 Winner</option>
                 <option value="rejected">Rejected</option>
               </select>
+            </div>
 
-              <!-- City Filter -->
+            <!-- City Filter -->
+            <div class="relative">
               <select id="filterCity" onchange="loadEntries(1)"
-                class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-red-600 cursor-pointer">
+                class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none focus:border-red-600 focus:bg-white cursor-pointer transition">
                 <option value="">All Cities</option>
                 <option value="pune">Pune</option>
                 <option value="mumbai">Mumbai</option>
@@ -469,95 +493,111 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                 <option value="kolhapur">Kolhapur</option>
                 <option value="other">Other Outlets</option>
               </select>
+            </div>
 
-              <!-- Sort By -->
+            <!-- Sort By -->
+            <div class="relative">
               <select id="filterSort" onchange="loadEntries(1)"
-                class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-red-600 cursor-pointer">
+                class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none focus:border-red-600 focus:bg-white cursor-pointer transition">
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
                 <option value="name_asc">Name (A-Z)</option>
               </select>
-
-              <button onclick="loadEntries(1)"
-                class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl border border-slate-200 transition"
-                title="Refresh records">
-                <i data-lucide="rotate-cw" class="w-4 h-4"></i>
-              </button>
             </div>
 
           </div>
 
-          <!-- Bulk Action Bar -->
+          <!-- Elevated Bulk Action Bar with clear spacing between actions -->
           <div id="bulkActionBar"
-            class="hidden p-2.5 bg-red-50 border border-red-200 rounded-xl flex items-center justify-between text-xs">
-            <div class="flex items-center gap-2 text-red-800 font-semibold">
-              <span id="selectedCount">0</span> selected:
+            class="hidden p-4 bg-red-50/90 border border-red-200/90 rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 text-xs shadow-xs">
+            <div class="flex items-center gap-2.5 text-red-900 font-bold">
+              <div class="w-6 h-6 rounded-lg bg-red-600 text-white flex items-center justify-center text-xs">
+                <i data-lucide="check" class="w-3.5 h-3.5"></i>
+              </div>
+              <div>
+                <span id="selectedCount" class="font-black text-sm">0</span> contestants selected
+              </div>
+              <button onclick="clearAllSelections()" class="text-xs text-red-700 hover:text-red-900 underline ml-2 font-medium">Deselect all</button>
             </div>
-            <div class="flex items-center gap-2">
+
+            <div class="flex flex-wrap items-center gap-2.5 sm:gap-3">
               <select id="bulkStatusSelect"
-                class="px-2.5 py-1 bg-white border border-red-200 rounded-lg text-xs font-medium text-slate-700">
-                <option value="shortlisted">Mark Shortlisted</option>
-                <option value="winner">Mark Winner</option>
+                class="h-9.5 px-3 bg-white border border-red-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none">
+                <option value="shortlisted">⭐ Mark Shortlisted</option>
+                <option value="winner">🏆 Mark Winner</option>
                 <option value="under_review">Mark Under Review</option>
                 <option value="rejected">Mark Rejected</option>
               </select>
               <button onclick="applyBulkStatus()"
-                class="px-3 py-1 bg-[#D8232A] text-white rounded-lg font-bold hover:bg-[#B3181E] transition">Apply</button>
+                class="h-9.5 px-4 bg-[#D8232A] hover:bg-[#B3181E] text-white rounded-xl font-bold shadow-xs transition flex items-center gap-1.5">
+                <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Apply Status
+              </button>
+              
+              <div class="h-6 w-px bg-red-200 mx-1 hidden sm:block"></div>
+
               <button onclick="applyBulkDelete()"
-                class="px-3 py-1 bg-slate-200 text-slate-700 hover:bg-red-600 hover:text-white rounded-lg font-bold transition">Delete</button>
+                class="h-9.5 px-4 bg-white border border-red-300 text-red-600 hover:bg-red-600 hover:text-white rounded-xl font-bold transition flex items-center gap-1.5 shadow-xs">
+                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Delete Selected
+              </button>
             </div>
           </div>
 
         </div>
 
-        <!-- MAIN DATA TABLE -->
+        <!-- MAIN DATA CONTAINER (Desktop Table + Mobile Cards) -->
         <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
 
-          <div class="overflow-x-auto custom-scrollbar">
+          <!-- 1. Desktop Table View (Hidden on mobile) -->
+          <div class="hidden md:block overflow-x-auto custom-scrollbar">
             <table class="w-full text-left text-xs text-slate-600 border-collapse">
-
-              <thead class="bg-slate-50 border-b border-slate-200/80 text-slate-500 font-bold uppercase tracking-wider">
+              <thead class="bg-slate-50/90 border-b border-slate-200/80 text-slate-500 font-bold uppercase tracking-wider text-[11px]">
                 <tr>
-                  <th class="p-3 pl-4 w-10">
+                  <th class="p-3.5 pl-5 w-12 text-center">
                     <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()"
-                      class="rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
+                      class="w-4 h-4 rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
                   </th>
-                  <th class="p-3">Ticket ID</th>
-                  <th class="p-3">Contestant</th>
-                  <th class="p-3">Category</th>
-                  <th class="p-3">Contact</th>
-                  <th class="p-3">Location / Store</th>
-                  <th class="p-3">Reel / Video</th>
-                  <th class="p-3">Status</th>
-                  <th class="p-3 pr-4 text-right">Actions</th>
+                  <th class="p-3.5">Ticket ID</th>
+                  <th class="p-3.5">Contestant</th>
+                  <th class="p-3.5">Category</th>
+                  <th class="p-3.5">Contact</th>
+                  <th class="p-3.5">Location / Store</th>
+                  <th class="p-3.5">Reel / Video</th>
+                  <th class="p-3.5">Review Status</th>
+                  <th class="p-3.5 pr-6 text-right">Actions</th>
                 </tr>
               </thead>
-
               <tbody id="entriesTableBody" class="divide-y divide-slate-100 font-medium">
                 <tr>
-                  <td colspan="9" class="p-8 text-center text-slate-400">
+                  <td colspan="9" class="p-10 text-center text-slate-400">
                     <i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto mb-2 text-[#D8232A]"></i>
                     Loading contest registrations...
                   </td>
                 </tr>
               </tbody>
-
             </table>
+          </div>
+
+          <!-- 2. Mobile Cards Stream (Visible only on mobile < 768px) -->
+          <div id="entriesMobileFeed" class="md:hidden p-3.5 sm:p-4 space-y-3.5">
+            <div class="p-8 text-center text-slate-400">
+              <i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto mb-2 text-[#D8232A]"></i>
+              Loading contest registrations...
+            </div>
           </div>
 
           <!-- Table Footer / Pagination -->
           <div
-            class="p-4 border-t border-slate-200/80 bg-slate-50 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
-            <div id="paginationInfo">Showing 0 to 0 of 0 entries</div>
-            <div class="flex items-center gap-2">
+            class="p-4 sm:p-5 border-t border-slate-200/80 bg-slate-50/70 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <div id="paginationInfo" class="font-medium text-slate-600 text-center sm:text-left">Showing 0 to 0 of 0 entries</div>
+            <div class="flex items-center gap-2.5">
               <button id="prevPageBtn" onclick="changePage(-1)"
-                class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-semibold hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition">
-                &larr; Previous
+                class="px-4 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1 shadow-2xs">
+                <i data-lucide="chevron-left" class="w-4 h-4"></i> Previous
               </button>
-              <span id="currentPageNum" class="font-bold text-slate-800 font-mono px-2">1</span>
+              <span id="currentPageNum" class="font-bold text-slate-900 font-mono px-3 py-1 bg-white border border-slate-200 rounded-xl">1</span>
               <button id="nextPageBtn" onclick="changePage(1)"
-                class="px-3 py-1.5 bg-white border border-slate-200 rounded-lg font-semibold hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition">
-                Next &rarr;
+                class="px-4 py-2 bg-white border border-slate-200 rounded-xl font-bold text-slate-700 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-1 shadow-2xs">
+                Next <i data-lucide="chevron-right" class="w-4 h-4"></i>
               </button>
             </div>
           </div>
@@ -573,25 +613,25 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
 
     <!-- Modal 1: View Full Contestant Dossier -->
     <div id="viewDossierModal"
-      class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200">
-        <div class="bg-slate-900 text-white p-5 flex items-center justify-between">
+      class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+      <div class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
+        <div class="bg-slate-900 text-white p-4 sm:p-5 flex items-center justify-between shrink-0">
           <div class="flex items-center gap-2.5">
             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
             <h3 class="font-heading font-bold text-base">Contestant Dossier</h3>
           </div>
-          <button onclick="closeModal('viewDossierModal')" class="text-slate-400 hover:text-white p-1 rounded-lg">
+          <button onclick="closeModal('viewDossierModal')" class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/10 transition">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
 
-        <div class="p-6 space-y-4 text-xs" id="dossierModalContent">
+        <div class="p-5 sm:p-6 space-y-4 text-xs overflow-y-auto custom-scrollbar flex-1" id="dossierModalContent">
           <!-- Injected safely via JS -->
         </div>
 
-        <div class="p-4 bg-slate-50 border-t border-slate-200 flex justify-end">
+        <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex items-center justify-end shrink-0">
           <button onclick="closeModal('viewDossierModal')"
-            class="px-4 py-2 bg-slate-800 text-white font-semibold rounded-xl text-xs hover:bg-slate-900 transition">
+            class="h-10 px-5 bg-slate-800 text-white font-bold rounded-xl text-xs sm:text-sm hover:bg-slate-900 transition shadow-2xs">
             Close Dossier
           </button>
         </div>
@@ -600,93 +640,106 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
 
     <!-- Modal 2: Edit Contestant Details -->
     <div id="editEntryModal"
-      class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200">
-        <div class="p-5 border-b border-slate-200 flex items-center justify-between">
-          <h3 class="font-heading font-bold text-base text-slate-800">Edit Contestant Record</h3>
-          <button onclick="closeModal('editEntryModal')" class="text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+      class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+      <div class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+              <i data-lucide="edit-3" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h3 class="font-heading font-bold text-base text-slate-900">Edit Contestant Record</h3>
+              <p class="text-[11px] text-slate-500">Update contestant details and status</p>
+            </div>
+          </div>
+          <button onclick="closeModal('editEntryModal')" class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
 
-        <form id="editEntryForm" onsubmit="handleEditSubmit(event)" class="p-6 space-y-3.5 text-xs">
-          <input type="hidden" id="editEntryId" name="id">
+        <form id="editEntryForm" onsubmit="handleEditSubmit(event)" class="flex flex-col flex-1 overflow-hidden min-h-0">
+          <div class="p-5 sm:p-6 space-y-4 text-xs overflow-y-auto custom-scrollbar flex-1">
+            <input type="hidden" id="editEntryId" name="id">
 
-          <div>
-            <label class="block font-bold text-slate-600 mb-1">Full Name *</label>
-            <input type="text" id="editFullName" name="full_name" required
-              class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:border-red-600 focus:bg-white focus:outline-none">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5">Full Name *</label>
+              <input type="text" id="editFullName" name="full_name" required
+                class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:border-red-600 focus:bg-white focus:outline-none transition">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Mobile (10 digits) *</label>
+                <input type="tel" id="editMobile" name="mobile_number" pattern="[0-9]{10}" required
+                  class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono focus:border-red-600 focus:bg-white focus:outline-none transition">
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Email Address *</label>
+                <input type="email" id="editEmail" name="email_address" required
+                  class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:border-red-600 focus:bg-white focus:outline-none transition">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Category</label>
+                <select id="editCategory" name="category"
+                  class="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:border-red-600 focus:outline-none transition cursor-pointer">
+                  <option value="male">👨 Male (Solo)</option>
+                  <option value="female">👩 Female (Solo)</option>
+                  <option value="child">🧒 Child / Family</option>
+                  <option value="group">👥 Group Squad</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Status</label>
+                <select id="editStatus" name="status"
+                  class="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:border-red-600 focus:outline-none transition cursor-pointer">
+                  <option value="registered">Registered</option>
+                  <option value="under_review">Under Review</option>
+                  <option value="shortlisted">⭐ Shortlisted</option>
+                  <option value="winner">🏆 Winner</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">City</label>
+                <input type="text" id="editCity" name="city"
+                  class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-red-600 focus:bg-white focus:outline-none transition">
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Store Code</label>
+                <input type="text" id="editStoreCode" name="store_code"
+                  class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-mono focus:border-red-600 focus:bg-white focus:outline-none transition">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Instagram Handle</label>
+                <input type="text" id="editInstagram" name="instagram_handle" placeholder="@username"
+                  class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-red-600 focus:bg-white focus:outline-none transition">
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Reel / Video URL</label>
+                <input type="url" id="editVideoUrl" name="video_url" placeholder="https://..."
+                  class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-red-600 focus:bg-white focus:outline-none transition">
+              </div>
+            </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block font-bold text-slate-600 mb-1">Mobile (10 digits) *</label>
-              <input type="tel" id="editMobile" name="mobile_number" pattern="[0-9]{10}" required
-                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:border-red-600 focus:bg-white focus:outline-none">
-            </div>
-            <div>
-              <label class="block font-bold text-slate-600 mb-1">Email Address *</label>
-              <input type="email" id="editEmail" name="email_address" required
-                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:border-red-600 focus:bg-white focus:outline-none">
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block font-bold text-slate-600 mb-1">Category</label>
-              <select id="editCategory" name="category"
-                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:border-red-600 focus:outline-none">
-                <option value="male">Male (Solo)</option>
-                <option value="female">Female (Solo)</option>
-                <option value="child">Child / Family</option>
-                <option value="group">Group Squad</option>
-              </select>
-            </div>
-            <div>
-              <label class="block font-bold text-slate-600 mb-1">Status</label>
-              <select id="editStatus" name="status"
-                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:border-red-600 focus:outline-none">
-                <option value="registered">Registered</option>
-                <option value="under_review">Under Review</option>
-                <option value="shortlisted">⭐ Shortlisted</option>
-                <option value="winner">🏆 Winner</option>
-                <option value="rejected">Rejected</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block font-bold text-slate-600 mb-1">City</label>
-              <input type="text" id="editCity" name="city"
-                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:border-red-600 focus:bg-white focus:outline-none">
-            </div>
-            <div>
-              <label class="block font-bold text-slate-600 mb-1">Store Code</label>
-              <input type="text" id="editStoreCode" name="store_code"
-                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:border-red-600 focus:bg-white focus:outline-none">
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block font-bold text-slate-600 mb-1">Instagram Handle</label>
-              <input type="text" id="editInstagram" name="instagram_handle" placeholder="@username"
-                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:border-red-600 focus:bg-white focus:outline-none">
-            </div>
-            <div>
-              <label class="block font-bold text-slate-600 mb-1">Reel / Video URL</label>
-              <input type="url" id="editVideoUrl" name="video_url" placeholder="https://..."
-                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:border-red-600 focus:bg-white focus:outline-none">
-            </div>
-          </div>
-
-          <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+          <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 shrink-0">
             <button type="button" onclick="closeModal('editEntryModal')"
-              class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition">Cancel</button>
+              class="h-10 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs sm:text-sm transition text-center min-w-[90px]">
+              Cancel
+            </button>
             <button type="submit"
-              class="px-4 py-2 bg-[#D8232A] hover:bg-[#B3181E] text-white rounded-xl font-bold shadow-xs transition">Save
-              Changes</button>
+              class="h-10 px-6 bg-[#D8232A] hover:bg-[#B3181E] text-white rounded-xl font-bold text-xs sm:text-sm shadow-xs hover:shadow transition flex items-center justify-center gap-2">
+              <i data-lucide="check" class="w-4 h-4"></i> Save Changes
+            </button>
           </div>
         </form>
       </div>
@@ -694,96 +747,109 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
 
     <!-- Modal 3: Create Manual Contestant -->
     <div id="createEntryModal"
-      class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200">
+      class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+      <div class="bg-white rounded-3xl max-w-lg w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
         <div
-          class="p-5 border-b border-slate-200 bg-gradient-to-r from-[#D8232A] to-[#B3181E] text-white flex items-center justify-between">
-          <h3 class="font-heading font-bold text-base">New Walk-In Contestant Registration</h3>
-          <button onclick="closeModal('createEntryModal')" class="text-red-200 hover:text-white p-1 rounded-lg">
+          class="p-4 sm:p-5 border-b border-slate-200 bg-gradient-to-r from-[#D8232A] to-[#B3181E] text-white flex items-center justify-between shrink-0">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-white/10 text-white flex items-center justify-center">
+              <i data-lucide="user-plus" class="w-4 h-4"></i>
+            </div>
+            <div>
+              <h3 class="font-heading font-bold text-base">New Walk-In Contestant</h3>
+              <p class="text-[11px] text-red-100">Manual counter/parlour registration</p>
+            </div>
+          </div>
+          <button onclick="closeModal('createEntryModal')" class="w-8 h-8 rounded-xl flex items-center justify-center text-red-200 hover:text-white hover:bg-white/10 transition">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
 
-        <form id="createEntryForm" onsubmit="handleCreateSubmit(event)" class="p-6 space-y-3.5 text-xs">
-          <div>
-            <label class="block font-bold text-slate-600 mb-1">Full Name *</label>
-            <input type="text" name="full_name" required placeholder="e.g. Aryan Deshmukh"
-              class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:border-red-600 focus:bg-white focus:outline-none">
+        <form id="createEntryForm" onsubmit="handleCreateSubmit(event)" class="flex flex-col flex-1 overflow-hidden min-h-0">
+          <div class="p-5 sm:p-6 space-y-4 text-xs overflow-y-auto custom-scrollbar flex-1">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5">Full Name *</label>
+              <input type="text" name="full_name" required placeholder="e.g. Aryan Deshmukh"
+                class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:border-red-600 focus:bg-white focus:outline-none transition">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Mobile (10 digits) *</label>
+                <input type="tel" name="mobile_number" pattern="[0-9]{10}" required placeholder="9822012345"
+                  class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono focus:border-red-600 focus:bg-white focus:outline-none transition">
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Email Address *</label>
+                <input type="email" name="email_address" required placeholder="aryan@example.com"
+                  class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:border-red-600 focus:bg-white focus:outline-none transition">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Category *</label>
+                <select name="category"
+                  class="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:border-red-600 focus:outline-none transition cursor-pointer">
+                  <option value="male">👨 Male (Solo)</option>
+                  <option value="female">👩 Female (Solo)</option>
+                  <option value="child">🧒 Child / Family</option>
+                  <option value="group">👥 Group Squad</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Initial Status</label>
+                <select name="status"
+                  class="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:border-red-600 focus:outline-none transition cursor-pointer">
+                  <option value="registered">Registered</option>
+                  <option value="under_review">Under Review</option>
+                  <option value="shortlisted">⭐ Shortlisted</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Nearest City</label>
+                <select name="city"
+                  class="w-full h-10 px-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:border-red-600 focus:outline-none transition cursor-pointer">
+                  <option value="pune">Pune</option>
+                  <option value="mumbai">Mumbai</option>
+                  <option value="nashik">Nashik</option>
+                  <option value="nagpur">Nagpur</option>
+                  <option value="kolhapur">Kolhapur</option>
+                </select>
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Parlour Store Code</label>
+                <input type="text" name="store_code" value="PUN-FC-01"
+                  class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-mono focus:border-red-600 focus:bg-white focus:outline-none transition">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Instagram @Handle</label>
+                <input type="text" name="instagram_handle" placeholder="@username"
+                  class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-red-600 focus:bg-white focus:outline-none transition">
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 mb-1.5">Reel / Video URL</label>
+                <input type="url" name="video_url" placeholder="https://..."
+                  class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-red-600 focus:bg-white focus:outline-none transition">
+              </div>
+            </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block font-bold text-slate-600 mb-1">Mobile (10 digits) *</label>
-              <input type="tel" name="mobile_number" pattern="[0-9]{10}" required placeholder="9822012345"
-                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:border-red-600 focus:bg-white focus:outline-none">
-            </div>
-            <div>
-              <label class="block font-bold text-slate-600 mb-1">Email Address *</label>
-              <input type="email" name="email_address" required placeholder="aryan@example.com"
-                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:border-red-600 focus:bg-white focus:outline-none">
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block font-bold text-slate-600 mb-1">Category *</label>
-              <select name="category"
-                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:border-red-600 focus:outline-none">
-                <option value="male">Male (Solo)</option>
-                <option value="female">Female (Solo)</option>
-                <option value="child">Child / Family</option>
-                <option value="group">Group Squad</option>
-              </select>
-            </div>
-            <div>
-              <label class="block font-bold text-slate-600 mb-1">Initial Status</label>
-              <select name="status"
-                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:border-red-600 focus:outline-none">
-                <option value="registered">Registered</option>
-                <option value="under_review">Under Review</option>
-                <option value="shortlisted">⭐ Shortlisted</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block font-bold text-slate-600 mb-1">Nearest City</label>
-              <select name="city"
-                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:border-red-600 focus:outline-none">
-                <option value="pune">Pune</option>
-                <option value="mumbai">Mumbai</option>
-                <option value="nashik">Nashik</option>
-                <option value="nagpur">Nagpur</option>
-                <option value="kolhapur">Kolhapur</option>
-              </select>
-            </div>
-            <div>
-              <label class="block font-bold text-slate-600 mb-1">Parlour Store Code</label>
-              <input type="text" name="store_code" value="PUN-FC-01"
-                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:border-red-600 focus:bg-white focus:outline-none">
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block font-bold text-slate-600 mb-1">Instagram @Handle</label>
-              <input type="text" name="instagram_handle" placeholder="@username"
-                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:border-red-600 focus:bg-white focus:outline-none">
-            </div>
-            <div>
-              <label class="block font-bold text-slate-600 mb-1">Reel / Video URL</label>
-              <input type="url" name="video_url" placeholder="https://..."
-                class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:border-red-600 focus:bg-white focus:outline-none">
-            </div>
-          </div>
-
-          <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+          <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 shrink-0">
             <button type="button" onclick="closeModal('createEntryModal')"
-              class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition">Cancel</button>
+              class="h-10 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs sm:text-sm transition text-center min-w-[90px]">
+              Cancel
+            </button>
             <button type="submit"
-              class="px-4 py-2 bg-[#D8232A] hover:bg-[#B3181E] text-white rounded-xl font-bold shadow-xs transition">Create
-              Contestant Entry</button>
+              class="h-10 px-6 bg-[#D8232A] hover:bg-[#B3181E] text-white rounded-xl font-bold text-xs sm:text-sm shadow-xs hover:shadow transition flex items-center justify-center gap-2">
+              <i data-lucide="plus" class="w-4 h-4"></i> Create Contestant Entry
+            </button>
           </div>
         </form>
       </div>
@@ -793,9 +859,9 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
     <!-- 6. CHANGE SUPERADMIN DATABASE PASSWORD MODAL              -->
     <!-- ========================================================= -->
     <div id="changePasswordModal"
-      class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-      <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+      class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4">
+      <div class="bg-white rounded-3xl max-w-md w-full max-h-[92vh] flex flex-col overflow-hidden shadow-2xl border border-slate-200">
+        <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between shrink-0 bg-white">
           <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
               <i data-lucide="shield-check" class="w-4 h-4"></i>
@@ -807,43 +873,47 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
             </div>
           </div>
           <button onclick="closeModal('changePasswordModal')"
-            class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100">
+            class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition">
             <i data-lucide="x" class="w-5 h-5"></i>
           </button>
         </div>
 
-        <form id="changePasswordForm" onsubmit="handleChangePasswordSubmit(event)" class="space-y-4 text-xs">
-          <div id="pwdAlertBox" class="hidden p-3 rounded-xl text-xs font-semibold"></div>
+        <form id="changePasswordForm" onsubmit="handleChangePasswordSubmit(event)" class="flex flex-col flex-1 overflow-hidden min-h-0">
+          <div class="p-5 sm:p-6 space-y-4 text-xs overflow-y-auto custom-scrollbar flex-1">
+            <div id="pwdAlertBox" class="hidden p-3 rounded-xl text-xs font-semibold"></div>
 
-          <div>
-            <label class="block font-bold text-slate-600 mb-1">Active Username</label>
-            <input type="text" value="<?= $adminUser ?>" disabled
-              class="w-full p-2.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 font-mono text-xs cursor-not-allowed">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5">Active Username</label>
+              <input type="text" value="<?= $adminUser ?>" disabled
+                class="w-full h-10 px-3.5 bg-slate-100 border border-slate-200 rounded-xl text-slate-500 font-mono text-xs cursor-not-allowed">
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5">Current Password *</label>
+              <input type="password" id="curPwdInput" required placeholder="Enter current superadmin password"
+                class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-red-600 focus:bg-white focus:outline-none transition">
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5">New Password (Min 8 chars) *</label>
+              <input type="password" id="newPwdInput" required minlength="8" placeholder="Create strong new password"
+                class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-red-600 focus:bg-white focus:outline-none transition">
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 mb-1.5">Confirm New Password *</label>
+              <input type="password" id="confPwdInput" required minlength="8" placeholder="Confirm new password"
+                class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:border-red-600 focus:bg-white focus:outline-none transition">
+            </div>
           </div>
 
-          <div>
-            <label class="block font-bold text-slate-600 mb-1">Current Password *</label>
-            <input type="password" id="curPwdInput" required placeholder="Enter current superadmin password"
-              class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:border-red-600 focus:bg-white focus:outline-none">
-          </div>
-
-          <div>
-            <label class="block font-bold text-slate-600 mb-1">New Password (Min 8 chars) *</label>
-            <input type="password" id="newPwdInput" required minlength="8" placeholder="Create strong new password"
-              class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:border-red-600 focus:bg-white focus:outline-none">
-          </div>
-
-          <div>
-            <label class="block font-bold text-slate-600 mb-1">Confirm New Password *</label>
-            <input type="password" id="confPwdInput" required minlength="8" placeholder="Confirm new password"
-              class="w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:border-red-600 focus:bg-white focus:outline-none">
-          </div>
-
-          <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2">
+          <div class="p-4 sm:p-5 bg-slate-50 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-3 sm:gap-4 shrink-0">
             <button type="button" onclick="closeModal('changePasswordModal')"
-              class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold transition">Cancel</button>
+              class="h-10 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs sm:text-sm transition text-center min-w-[90px]">
+              Cancel
+            </button>
             <button type="submit" id="savePwdBtn"
-              class="px-4 py-2 bg-[#D8232A] hover:bg-[#B3181E] text-white rounded-xl font-bold shadow-xs transition flex items-center gap-1.5">
+              class="h-10 px-6 bg-[#D8232A] hover:bg-[#B3181E] text-white rounded-xl font-bold text-xs sm:text-sm shadow-xs hover:shadow transition flex items-center justify-center gap-2">
               <i data-lucide="save" class="w-4 h-4"></i> Update Password
             </button>
           </div>
@@ -936,14 +1006,15 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
         const sort = document.getElementById('filterSort').value;
 
         const tbody = document.getElementById('entriesTableBody');
-        tbody.innerHTML = `
-        <tr>
-          <td colspan="9" class="p-8 text-center text-slate-400">
-            <i data-lucide="loader-2" class="w-6 h-6 animate-spin mx-auto mb-2 text-[#D8232A]"></i>
-            Fetching contestant records...
-          </td>
-        </tr>
-      `;
+        const mobileFeed = document.getElementById('entriesMobileFeed');
+        const loaderHtml = `
+          <div class="p-10 text-center text-slate-400">
+            <i data-lucide="loader-2" class="w-7 h-7 animate-spin mx-auto mb-2 text-[#D8232A]"></i>
+            <p class="text-xs font-semibold">Fetching contestant records...</p>
+          </div>
+        `;
+        tbody.innerHTML = `<tr><td colspan="9">${loaderHtml}</td></tr>`;
+        if (mobileFeed) mobileFeed.innerHTML = loaderHtml;
         if (window.lucide) lucide.createIcons();
 
         try {
@@ -969,123 +1040,212 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
             updatePaginationUI(data.total, data.page, data.limit);
           }
         } catch (err) {
-          tbody.innerHTML = `
-          <tr>
-            <td colspan="9" class="p-8 text-center text-red-500">
-              Failed to load records from server.
-            </td>
-          </tr>
-        `;
+          const errHtml = `
+            <div class="p-10 text-center text-red-500">
+              <i data-lucide="alert-triangle" class="w-7 h-7 mx-auto mb-2 text-red-400"></i>
+              <p class="text-xs font-semibold">Failed to load records from server.</p>
+            </div>
+          `;
+          tbody.innerHTML = `<tr><td colspan="9">${errHtml}</td></tr>`;
+          if (mobileFeed) mobileFeed.innerHTML = errHtml;
+          if (window.lucide) lucide.createIcons();
         }
+      }
+
+      function resetAllFilters() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('clearSearchBtn').classList.add('hidden');
+        document.getElementById('filterCategory').value = '';
+        document.getElementById('filterStatus').value = '';
+        document.getElementById('filterCity').value = '';
+        document.getElementById('filterSort').value = 'newest';
+        loadEntries(1);
+      }
+
+      function clearAllSelections() {
+        selectedEntryIds.clear();
+        updateBulkActionUI();
+        document.querySelectorAll('.row-checkbox').forEach(cb => cb.checked = false);
+        const selectAll = document.getElementById('selectAllCheckbox');
+        if (selectAll) selectAll.checked = false;
       }
 
       function renderTableRows(entries) {
         const tbody = document.getElementById('entriesTableBody');
+        const mobileFeed = document.getElementById('entriesMobileFeed');
         tbody.innerHTML = '';
+        if (mobileFeed) mobileFeed.innerHTML = '';
 
         if (entries.length === 0) {
-          tbody.innerHTML = `
-          <tr>
-            <td colspan="9" class="p-10 text-center text-slate-400">
-              <i data-lucide="inbox" class="w-8 h-8 mx-auto mb-2 text-slate-300"></i>
-              No contestant records match your filters.
-            </td>
-          </tr>
-        `;
+          const emptyHtml = `
+            <div class="p-12 text-center text-slate-400">
+              <i data-lucide="inbox" class="w-10 h-10 mx-auto mb-2.5 text-slate-300"></i>
+              <p class="font-heading font-bold text-slate-700 text-sm">No contestants found</p>
+              <p class="text-xs text-slate-400 mt-1">Try adjusting your search criteria or resetting active filters.</p>
+            </div>
+          `;
+          tbody.innerHTML = `<tr><td colspan="9">${emptyHtml}</td></tr>`;
+          if (mobileFeed) mobileFeed.innerHTML = emptyHtml;
           if (window.lucide) lucide.createIcons();
           return;
         }
 
+        const catIcons = {
+          'male': '👨',
+          'female': '👩',
+          'child': '🧒',
+          'group': '👥'
+        };
+
+        const statusStyles = {
+          'registered': 'bg-slate-100 text-slate-700 border-slate-200',
+          'under_review': 'bg-blue-50 text-blue-700 border-blue-200',
+          'shortlisted': 'bg-purple-50 text-purple-700 border-purple-200',
+          'winner': 'bg-amber-100 text-amber-800 border-amber-300 font-bold',
+          'rejected': 'bg-red-50 text-red-700 border-red-200'
+        };
+
         entries.forEach(row => {
-          const tr = document.createElement('tr');
-          tr.className = 'hover:bg-slate-50/80 transition-colors';
           const isChecked = selectedEntryIds.has(row.id);
-
-          const catIcons = {
-            'male': '👨',
-            'female': '👩',
-            'child': '🧒',
-            'group': '👥'
-          };
-
-          const statusStyles = {
-            'registered': 'bg-slate-100 text-slate-700 border-slate-200',
-            'under_review': 'bg-blue-50 text-blue-700 border-blue-200',
-            'shortlisted': 'bg-purple-50 text-purple-700 border-purple-200',
-            'winner': 'bg-amber-100 text-amber-800 border-amber-300 font-bold',
-            'rejected': 'bg-red-50 text-red-700 border-red-200'
-          };
-
           const currStatusStyle = statusStyles[row.status] || statusStyles['registered'];
           const validatedVideoUrl = safeUrl(row.video_url);
 
+          // 1. DESKTOP ROW
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-slate-50/80 transition-colors group';
           tr.innerHTML = `
-          <td class="p-3 pl-4">
-            <input type="checkbox" onchange="toggleSelectRow(${row.id})" ${isChecked ? 'checked' : ''} class="row-checkbox rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
-          </td>
-          
-          <td class="p-3 font-mono font-bold text-[#D8232A] whitespace-nowrap">
-            ${escapeHtml(row.entry_code || '#M-2026')}
-          </td>
+            <td class="p-3.5 pl-5 text-center">
+              <input type="checkbox" onchange="toggleSelectRow(${row.id})" ${isChecked ? 'checked' : ''} class="w-4 h-4 row-checkbox rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
+            </td>
+            
+            <td class="p-3.5 font-mono font-bold text-[#D8232A] whitespace-nowrap text-xs">
+              ${escapeHtml(row.entry_code || '#M-2026')}
+            </td>
 
-          <td class="p-3">
-            <div class="font-bold text-slate-900">${escapeHtml(row.full_name || 'Contestant')}</div>
-            <div class="text-[11px] text-slate-500 flex items-center gap-1">
-              ${row.instagram_handle ? `<span class="text-blue-600 font-semibold">${escapeHtml(row.instagram_handle)}</span>` : '<span class="text-slate-400">No handle</span>'}
-            </div>
-          </td>
+            <td class="p-3.5">
+              <div class="font-bold text-slate-900 text-xs sm:text-sm">${escapeHtml(row.full_name || 'Contestant')}</div>
+              <div class="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
+                ${row.instagram_handle ? `<span class="text-blue-600 font-semibold">${escapeHtml(row.instagram_handle)}</span>` : '<span class="text-slate-400">No handle</span>'}
+              </div>
+            </td>
 
-          <td class="p-3 whitespace-nowrap">
-            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200">
-              <span>${catIcons[row.category] || '🍦'}</span>
-              <span class="capitalize">${escapeHtml(row.category || 'male')}</span>
-            </span>
-          </td>
+            <td class="p-3.5 whitespace-nowrap">
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200">
+                <span>${catIcons[row.category] || '🍦'}</span>
+                <span class="capitalize">${escapeHtml(row.category || 'male')}</span>
+              </span>
+            </td>
 
-          <td class="p-3 whitespace-nowrap">
-            <div class="text-slate-800 font-mono text-xs">${escapeHtml(row.mobile_number || '-')}</div>
-            <div class="text-[11px] text-slate-500">${escapeHtml(row.email_address || '-')}</div>
-          </td>
+            <td class="p-3.5 whitespace-nowrap">
+              <div class="text-slate-800 font-mono text-xs font-semibold">${escapeHtml(row.mobile_number || '-')}</div>
+              <div class="text-[11px] text-slate-500">${escapeHtml(row.email_address || '-')}</div>
+            </td>
 
-          <td class="p-3 whitespace-nowrap">
-            <div class="capitalize text-slate-800 font-semibold">${escapeHtml(row.city || 'pune')}</div>
-            <span class="font-mono text-[11px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">${escapeHtml(row.store_code || 'GENERAL')}</span>
-          </td>
+            <td class="p-3.5 whitespace-nowrap">
+              <div class="capitalize text-slate-800 font-semibold text-xs">${escapeHtml(row.city || 'pune')}</div>
+              <span class="font-mono text-[10px] text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">${escapeHtml(row.store_code || 'GENERAL')}</span>
+            </td>
 
-          <td class="p-3 whitespace-nowrap">
-            ${validatedVideoUrl !== '#' ? `
-              <a href="${validatedVideoUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-bold transition">
-                <i data-lucide="video" class="w-3.5 h-3.5"></i> Watch Reel
-              </a>
-            ` : '<span class="text-slate-400 text-xs italic">Pending</span>'}
-          </td>
+            <td class="p-3.5 whitespace-nowrap">
+              ${validatedVideoUrl !== '#' ? `
+                <a href="${validatedVideoUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-bold border border-pink-200/80 transition shadow-2xs">
+                  <i data-lucide="video" class="w-3.5 h-3.5"></i> Watch Reel
+                </a>
+              ` : '<span class="text-slate-400 text-xs italic">Pending</span>'}
+            </td>
 
-          <td class="p-3 whitespace-nowrap">
-            <select onchange="updateRowStatus(${row.id}, this.value)" class="text-xs font-bold px-2 py-1 rounded-lg border cursor-pointer focus:outline-none transition ${currStatusStyle}">
-              <option value="registered" ${row.status === 'registered' ? 'selected' : ''}>Registered</option>
-              <option value="under_review" ${row.status === 'under_review' ? 'selected' : ''}>Under Review</option>
-              <option value="shortlisted" ${row.status === 'shortlisted' ? 'selected' : ''}>⭐ Shortlisted</option>
-              <option value="winner" ${row.status === 'winner' ? 'selected' : ''}>🏆 Winner</option>
-              <option value="rejected" ${row.status === 'rejected' ? 'selected' : ''}>Rejected</option>
-            </select>
-          </td>
+            <td class="p-3.5 whitespace-nowrap">
+              <select onchange="updateRowStatus(${row.id}, this.value)" class="text-xs font-bold px-2.5 py-1.5 rounded-xl border cursor-pointer focus:outline-none transition ${currStatusStyle}">
+                <option value="registered" ${row.status === 'registered' ? 'selected' : ''}>Registered</option>
+                <option value="under_review" ${row.status === 'under_review' ? 'selected' : ''}>Under Review</option>
+                <option value="shortlisted" ${row.status === 'shortlisted' ? 'selected' : ''}>⭐ Shortlisted</option>
+                <option value="winner" ${row.status === 'winner' ? 'selected' : ''}>🏆 Winner</option>
+                <option value="rejected" ${row.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+              </select>
+            </td>
 
-          <td class="p-3 pr-4 text-right whitespace-nowrap">
-            <div class="inline-flex items-center gap-1">
-              <button onclick="viewDossier(${row.id})" class="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition" title="View Full Dossier">
-                <i data-lucide="eye" class="w-4 h-4"></i>
-              </button>
-              <button onclick="openEditModal(${row.id})" class="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition" title="Edit Record">
-                <i data-lucide="edit-3" class="w-4 h-4"></i>
-              </button>
-              <button onclick="deleteSingleEntry(${row.id})" class="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition" title="Delete">
-                <i data-lucide="trash-2" class="w-4 h-4"></i>
-              </button>
-            </div>
-          </td>
-        `;
-
+            <!-- Desktop Action Buttons: Well-spaced (gap-2.5), comfortable touch targets -->
+            <td class="p-3.5 pr-6 text-right whitespace-nowrap">
+              <div class="inline-flex items-center gap-2.5">
+                <button onclick="viewDossier(${row.id})" class="w-8.5 h-8.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition flex items-center justify-center shadow-2xs" title="View Full Dossier">
+                  <i data-lucide="eye" class="w-4 h-4"></i>
+                </button>
+                <button onclick="openEditModal(${row.id})" class="w-8.5 h-8.5 rounded-xl border border-blue-200 bg-blue-50/70 text-blue-600 hover:bg-blue-600 hover:text-white transition flex items-center justify-center shadow-2xs" title="Edit Contestant Record">
+                  <i data-lucide="edit-3" class="w-4 h-4"></i>
+                </button>
+                <button onclick="deleteSingleEntry(${row.id})" class="w-8.5 h-8.5 rounded-xl border border-red-200 bg-red-50/70 text-red-600 hover:bg-red-600 hover:text-white transition flex items-center justify-center shadow-2xs" title="Delete Contestant Record">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+            </td>
+          `;
           tbody.appendChild(tr);
+
+          // 2. MOBILE CARD (Smooth stream with large, comfortable touch controls)
+          if (mobileFeed) {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-2xl border border-slate-200/90 p-4 space-y-3.5 shadow-2xs';
+            card.innerHTML = `
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5">
+                  <input type="checkbox" onchange="toggleSelectRow(${row.id})" ${isChecked ? 'checked' : ''} class="w-4.5 h-4.5 row-checkbox rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
+                  <span class="font-mono font-bold text-sm text-[#D8232A]">${escapeHtml(row.entry_code || '#M-2026')}</span>
+                </div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200">
+                  <span>${catIcons[row.category] || '🍦'}</span>
+                  <span class="capitalize">${escapeHtml(row.category || 'male')}</span>
+                </span>
+              </div>
+
+              <div>
+                <div class="font-heading font-black text-slate-900 text-base leading-snug">${escapeHtml(row.full_name || 'Contestant')}</div>
+                <div class="text-xs text-slate-500 flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                  ${row.instagram_handle ? `<span class="text-blue-600 font-semibold">${escapeHtml(row.instagram_handle)}</span>` : ''}
+                  <a href="tel:${escapeHtml(row.mobile_number || '')}" class="font-mono text-slate-700 hover:text-red-600 font-medium">${escapeHtml(row.mobile_number || '-')}</a>
+                  <span>${escapeHtml(row.email_address || '-')}</span>
+                </div>
+                <div class="text-xs text-slate-600 flex items-center gap-2 mt-2">
+                  <span class="capitalize font-semibold text-slate-800 flex items-center"><i data-lucide="map-pin" class="w-3.5 h-3.5 inline mr-1 text-slate-400"></i>${escapeHtml(row.city || 'pune')}</span>
+                  <span class="font-mono text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">${escapeHtml(row.store_code || 'GENERAL')}</span>
+                </div>
+              </div>
+
+              ${validatedVideoUrl !== '#' ? `
+                <div>
+                  <a href="${validatedVideoUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-pink-50 hover:bg-pink-100 text-pink-700 text-xs font-bold border border-pink-200/80 transition">
+                    <i data-lucide="video" class="w-3.5 h-3.5"></i> Watch Reel
+                  </a>
+                </div>
+              ` : ''}
+
+              <div class="pt-3 border-t border-slate-100 space-y-3">
+                <div class="flex items-center justify-between gap-3">
+                  <span class="text-xs font-bold text-slate-500">Review Status:</span>
+                  <select onchange="updateRowStatus(${row.id}, this.value)" class="h-9 text-xs font-bold px-3 rounded-xl border cursor-pointer focus:outline-none transition ${currStatusStyle}">
+                    <option value="registered" ${row.status === 'registered' ? 'selected' : ''}>Registered</option>
+                    <option value="under_review" ${row.status === 'under_review' ? 'selected' : ''}>Under Review</option>
+                    <option value="shortlisted" ${row.status === 'shortlisted' ? 'selected' : ''}>⭐ Shortlisted</option>
+                    <option value="winner" ${row.status === 'winner' ? 'selected' : ''}>🏆 Winner</option>
+                    <option value="rejected" ${row.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                  </select>
+                </div>
+
+                <!-- Mobile Action Buttons: 3 spacious distinct columns -->
+                <div class="grid grid-cols-3 gap-2.5 pt-1">
+                  <button onclick="viewDossier(${row.id})" class="h-10 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+                    <i data-lucide="eye" class="w-4 h-4 text-slate-500"></i> Dossier
+                  </button>
+                  <button onclick="openEditModal(${row.id})" class="h-10 rounded-xl border border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+                    <i data-lucide="edit-3" class="w-4 h-4 text-blue-500"></i> Edit
+                  </button>
+                  <button onclick="deleteSingleEntry(${row.id})" class="h-10 rounded-xl border border-red-200 bg-red-50 hover:bg-red-100 text-red-700 font-bold text-xs flex items-center justify-center gap-1.5 transition">
+                    <i data-lucide="trash-2" class="w-4 h-4 text-red-500"></i> Delete
+                  </button>
+                </div>
+              </div>
+            `;
+            mobileFeed.appendChild(card);
+          }
         });
 
         if (window.lucide) lucide.createIcons();
