@@ -245,7 +245,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
 
           <!-- Left: Brand & Title -->
           <div class="flex items-center gap-3 shrink-0">
-            <a href="../index.html" target="_blank" title="View Public Landing Page"
+            <a href="../" target="_blank" title="View Public Landing Page"
               class="flex items-center gap-2 hover:opacity-85 transition">
               <img src="../assets/official/meridian-logo-red.svg" alt="Meridian Ice Cream" class="h-8 sm:h-9 w-auto">
             </a>
@@ -286,7 +286,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                 <i data-lucide="refresh-cw" class="w-4 h-4"></i>
               </button>
 
-              <a href="../index.html" target="_blank"
+              <a href="../" target="_blank"
                 class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-600 hover:text-slate-900 transition flex items-center justify-center shrink-0"
                 title="View Public Website">
                 <i data-lucide="external-link" class="w-4 h-4"></i>

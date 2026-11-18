@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy &mdash; Meridian Ice Cream Brand Ambassador Contest</title>
+  <meta name="description" content="Official Privacy Policy for the Meridian Ice Cream Brand Ambassador Contest (Season 2026-2027), compliant with the Indian Digital Personal Data Protection (DPDP) Act.">
+  <meta name="robots" content="index, follow">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/official/meridian-logo-red.svg">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --brand-red: #D8232A;
+      --brand-red-dark: #B3181E;
+      --brand-red-deep: #7A0C17;
+      --brand-red-subtle: #FFF0F1;
+      --brand-red-glow: rgba(216, 35, 42, 0.2);
+      
+      --cream-bg: #FFFDF9;
+      --cream-warm: #FFF6EC;
+      --cream-card: #FFFFFF;
+      --cream-sand: #F8F1E9;
+      
+      --golden-amber: #FFAE19;
+      --golden-light: #FFF7EB;
+      
+      --pistachio-mint: #22C55E;
+      --pistachio-light: #F0FDF4;
+
+      --text-dark: #1A1817;
+      --text-body: #4A443F;
+      --text-muted: #7E756D;
+      --border-light: #ECE4DA;
+
+      --radius-sm: 8px;
+      --radius-md: 14px;
+      --radius-lg: 20px;
+
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 10px 30px -8px rgba(120, 60, 40, 0.08);
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--cream-bg);
+      color: var(--text-body);
+      line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-family: 'Outfit', sans-serif;
+      color: var(--text-dark);
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Top Utility Bar */
+    .utility-bar {
+      background: var(--brand-red-deep);
+      color: #FFFFFF;
+      font-size: 0.82rem;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .utility-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .utility-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .utility-badge {
+      background: rgba(255, 255, 255, 0.18);
+      padding: 3px 10px;
+      border-radius: 9999px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+    }
+
+    /* Navbar */
+    .navbar {
+      background: rgba(255, 253, 249, 0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-light);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 14px 0;
+    }
+    .navbar-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand-logo-img {
+      height: 48px;
+      width: auto;
+      display: block;
+    }
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700;
+      font-size: 0.88rem;
+      padding: 10px 20px;
+      border-radius: 9999px;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+    }
+    .btn-secondary {
+      background: #FFFFFF;
+      color: var(--text-dark);
+      border: 1px solid var(--border-light);
+    }
+    .btn-secondary:hover {
+      background: var(--cream-warm);
+      border-color: #D6C9BC;
+    }
+    .btn-primary {
+      background: var(--brand-red);
+      color: #FFFFFF;
+      box-shadow: 0 4px 14px var(--brand-red-glow);
+    }
+    .btn-primary:hover {
+      background: var(--brand-red-dark);
+      transform: translateY(-1px);
+    }
+
+    /* Breadcrumbs */
+    .breadcrumb-nav {
+      padding: 18px 0 10px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .breadcrumb-nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    .breadcrumb-nav a:hover {
+      color: var(--brand-red);
+    }
+    .breadcrumb-separator {
+      margin: 0 8px;
+      color: #C2B6A9;
+    }
+
+    /* Header Banner */
+    .doc-header {
+      background: linear-gradient(135deg, #FFF6EC 0%, #FFFFFF 100%);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      margin: 16px 0 36px;
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+    }
+    .doc-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--brand-red-subtle);
+      color: var(--brand-red);
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(216, 35, 42, 0.15);
+    }
+    .doc-title {
+      font-size: 2.3rem;
+      letter-spacing: -0.5px;
+      margin-bottom: 12px;
+      color: var(--text-dark);
+    }
+    .doc-subtitle {
+      font-size: 1.1rem;
+      color: var(--text-body);
+      margin-bottom: 24px;
+      font-weight: 500;
+    }
+    .doc-meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-light);
+    }
+    .doc-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .doc-meta-label {
+      font-size: 0.76rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .doc-meta-value {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    /* Content Layout */
+    .content-layout {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 40px;
+      align-items: start;
+      margin-bottom: 60px;
+    }
+
+    /* Sidebar Table of Contents */
+    .toc-sticky {
+      position: sticky;
+      top: 96px;
+      background: #FFFFFF;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-md);
+      padding: 24px;
+      box-shadow: var(--shadow-sm);
+      max-height: calc(100vh - 120px);
+      overflow-y: auto;
+    }
+    .toc-title {
+      font-size: 0.95rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 14px;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .toc-list a {
+      color: var(--text-body);
+      text-decoration: none;
+      font-size: 0.85rem;
+      padding: 6px 10px;
+      border-radius: 6px;
+      display: block;
+      transition: all 0.15s ease;
+    }
+    .toc-list a:hover {
+      background: var(--cream-warm);
+      color: var(--brand-red);
+      padding-left: 14px;
+    }
+
+    /* Legal Body */
+    .legal-body {
+      background: #FFFFFF;
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 44px;
+      box-shadow: var(--shadow-sm);
+    }
+    .legal-section {
+      margin-bottom: 38px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border-light);
+      scroll-margin-top: 100px;
+    }
+    .legal-section:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+    .legal-section h2 {
+      font-size: 1.45rem;
+      color: var(--brand-red-deep);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .legal-section p {
+      margin-bottom: 14px;
+      color: var(--text-body);
+      font-size: 0.95rem;
+    }
+    .legal-section ul, .legal-section ol {
+      margin: 12px 0 18px 24px;
+      color: var(--text-body);
+      font-size: 0.95rem;
+    }
+    .legal-section li {
+      margin-bottom: 8px;
+      padding-left: 4px;
+    }
+
+    /* Legal Callouts */
+    .legal-callout {
+      background: var(--cream-warm);
+      border-left: 4px solid var(--brand-red);
+      padding: 16px 20px;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      margin: 20px 0;
+      font-size: 0.92rem;
+    }
+    .legal-callout-success {
+      background: var(--pistachio-light);
+      border-left-color: var(--pistachio-mint);
+    }
+
+    /* Table styling */
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 0.9rem;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--border-light);
+    }
+    .data-table th {
+      background: var(--cream-warm);
+      color: var(--text-dark);
+      font-family: 'Outfit', sans-serif;
+      font-weight: 700;
+      text-align: left;
+      padding: 12px 18px;
+      border-bottom: 2px solid var(--border-light);
+    }
+    .data-table td {
+      padding: 12px 18px;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text-body);
+      vertical-align: top;
+    }
+    .data-table tr:last-child td {
+      border-bottom: none;
+    }
+    .data-table tr:hover td {
+      background: #FFFAF5;
+    }
+
+    /* Footer */
+    .site-footer {
+      background: #171514;
+      color: #9C958E;
+      padding: 60px 0 30px;
+      font-size: 0.9rem;
+      border-top: 1px solid #2B2725;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+    .footer-col-title {
+      font-size: 0.95rem;
+      color: #FFFFFF;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 16px;
+    }
+    .footer-links {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .footer-links a {
+      color: #9C958E;
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    .footer-links a:hover {
+      color: #FFFFFF;
+    }
+    .footer-bottom {
+      padding-top: 24px;
+      border-top: 1px solid #2B2725;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      font-size: 0.82rem;
+    }
+
+    @media (max-width: 900px) {
+      .content-layout {
+        grid-template-columns: 1fr;
+      }
+      .toc-sticky {
+        display: none;
+      }
+      .footer-grid {
+        grid-template-columns: 1fr;
+      }
+      .legal-body {
+        padding: 24px;
+      }
+      .doc-header {
+        padding: 24px;
+      }
+      .doc-title {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Utility Bar -->
+  <div class="utility-bar">
+    <div class="container utility-inner">
+      <div class="utility-left">
+        <span class="utility-badge">Privacy &amp; Data Protection</span>
+        <span>Meridian Ice Cream (Chavan &amp; Sons, Pune)</span>
+      </div>
+      <div>
+        <span>Compliant with the Digital Personal Data Protection (DPDP) Act, 2023</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sticky Navbar -->
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="./" style="display: flex; align-items: center; text-decoration: none;" title="Meridian Ice Cream">
+        <img src="assets/official/meridian-logo-red.svg" alt="Meridian Ice Cream Logo" class="brand-logo-img">
+      </a>
+      <div class="nav-actions">
+        <a href="terms" class="btn btn-secondary">
+          <i data-lucide="file-text" style="width: 16px; height: 16px;"></i> Contest Terms
+        </a>
+        <a href="./#register" class="btn btn-primary">
+          <i data-lucide="sparkles" style="width: 16px; height: 16px;"></i> Enter Contest
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="container">
+    
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+      <a href="./">Home</a>
+      <span class="breadcrumb-separator">/</span>
+      <a href="./#about">Contest</a>
+      <span class="breadcrumb-separator">/</span>
+      <span style="color: var(--text-dark); font-weight: 600;">Privacy Policy</span>
+    </nav>
+
+    <!-- Document Header -->
+    <header class="doc-header">
+      <span class="doc-pill">
+        <i data-lucide="shield-check" style="width: 14px; height: 14px;"></i> Data Protection Notice
+      </span>
+      <h1 class="doc-title">Meridian Brand Ambassador Contest &mdash; Privacy Policy</h1>
+      <p class="doc-subtitle">How Meridian collects, processes, protects, and safeguards participant data under Section 13 of the Official Contest Terms and the Digital Personal Data Protection Act, 2023.</p>
+      
+      <div class="doc-meta-grid">
+        <div class="doc-meta-item">
+          <span class="doc-meta-label">Data Fiduciary</span>
+          <span class="doc-meta-value">Meridian Ice Cream (Chavan &amp; Sons)</span>
+        </div>
+        <div class="doc-meta-item">
+          <span class="doc-meta-label">Headquarters</span>
+          <span class="doc-meta-value">Nanded Phata, Pune &ndash; 411041</span>
+        </div>
+        <div class="doc-meta-item">
+          <span class="doc-meta-label">Applicable Law</span>
+          <span class="doc-meta-value">DPDP Act 2023 (India)</span>
+        </div>
+        <div class="doc-meta-item">
+          <span class="doc-meta-label">Last Updated</span>
+          <span class="doc-meta-value">18 November 2026</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Layout Grid: Sidebar TOC + Document Body -->
+    <div class="content-layout">
+      
+      <!-- Sticky Navigation TOC -->
+      <aside class="toc-sticky">
+        <div class="toc-title">
+          <i data-lucide="list" style="width: 16px; height: 16px; color: var(--brand-red);"></i> Table of Contents
+        </div>
+        <ul class="toc-list">
+          <li><a href="#p-1">1. Data Fiduciary Identity</a></li>
+          <li><a href="#p-2">2. Scope of this Policy</a></li>
+          <li><a href="#p-3">3. Personal Data Collected</a></li>
+          <li><a href="#p-4">4. Lawful Purpose &amp; Usage</a></li>
+          <li><a href="#p-5">5. Minors &amp; Children's Privacy</a></li>
+          <li><a href="#p-6">6. Non-Sale &amp; Zero Sharing</a></li>
+          <li><a href="#p-7">7. Security &amp; Encryption</a></li>
+          <li><a href="#p-8">8. Retention &amp; Erasure</a></li>
+          <li><a href="#p-9">9. Data Principal Rights</a></li>
+          <li><a href="#p-10">10. Grievance Redressal</a></li>
+          <li><a href="#p-11">11. Updates to Policy</a></li>
+        </ul>
+      </aside>
+
+      <!-- Main Privacy Content -->
+      <article class="legal-body">
+
+        <!-- 1. Data Fiduciary Identity -->
+        <section id="p-1" class="legal-section">
+          <h2>1. Data Fiduciary Identity</h2>
+          <p>
+            Under the Digital Personal Data Protection Act, 2023 (&ldquo;DPDP Act&rdquo;), the Data Fiduciary responsible for the collection and processing of your personal data is:
+          </p>
+          <div class="legal-callout">
+            <strong>Meridian Ice Cream (Chavan &amp; Sons)</strong><br>
+            Registered Office: S. No. 25/6/18, Nanded, Nanded Shivane Link Road, Opp. Shravani Heights, Nanded Phata, Pune &ndash; 411041, Maharashtra, India.<br>
+            Email: <a href="mailto:privacy@meridianicecream.com" style="color: var(--brand-red);">privacy@meridianicecream.com</a><br>
+            Helpline: +91 98220 00000 / (020) 2439 1234
+          </div>
+          <p>
+            We are deeply committed to respecting your privacy, protecting your digital identity, and ensuring complete transparency in how your personal data is handled throughout the Meridian Brand Ambassador Contest campaign.
+          </p>
+        </section>
+
+        <!-- 2. Scope of this Policy -->
+        <section id="p-2" class="legal-section">
+          <h2>2. Scope of this Policy</h2>
+          <p>
+            This Privacy Policy applies specifically to all individuals who register, submit content, or interact with the Meridian Brand Ambassador Contest via our official web portal (<a href="./" style="color: var(--brand-red); font-weight: 600;">influencer.meridianicecreams.com</a>) or our official social media touchpoints.
+          </p>
+          <p>
+            This policy complements and operates in direct conjunction with <strong>Section 13 (Personal Information and Privacy)</strong> of the <a href="terms" style="color: var(--brand-red); font-weight: 600;">Official Contest Terms &amp; Conditions</a>.
+          </p>
+        </section>
+
+        <!-- 3. Personal Data Collected -->
+        <section id="p-3" class="legal-section">
+          <h2>3. Categories of Personal Data Collected</h2>
+          <p>
+            We collect only the minimum information strictly necessary to register, verify, evaluate, and administer entries in the Contest:
+          </p>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 28%;">Data Category</th>
+                <th style="width: 42%;">Specific Data Fields</th>
+                <th>Primary Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Identity &amp; Profile</strong></td>
+                <td>Full Name, Age / Category, City of Residence.</td>
+                <td>Identifying participants, assigning appropriate contest category, verifying basic eligibility.</td>
+              </tr>
+              <tr>
+                <td><strong>Contact Data</strong></td>
+                <td>Mobile Phone Number (WhatsApp / Calling), Email Address.</td>
+                <td>Direct communication, sending registration confirmations, and notifying shortlisted creators.</td>
+              </tr>
+              <tr>
+                <td><strong>Contest Submission</strong></td>
+                <td>Public Instagram Handle, Instagram Reel URL, Store / Parlour Code, creative notes.</td>
+                <td>Evaluating video content, assessing brand enthusiasm, and recording parlour origin.</td>
+              </tr>
+              <tr>
+                <td><strong>Parent / Guardian Data</strong></td>
+                <td>Parent/Guardian Full Name, Contact Number, and verifiable consent for entrants under 18 years.</td>
+                <td>Compliance with statutory child data protection standards under Indian law.</td>
+              </tr>
+              <tr>
+                <td><strong>Verification Proofs (Finalists only)</strong></td>
+                <td>Government-issued photo identification (Aadhaar, Passport, or PAN) requested solely from shortlisted finalists.</td>
+                <td>Preventing identity fraud, validating age compliance, and executing formal Brand Ambassador contracts.</td>
+              </tr>
+              <tr>
+                <td><strong>Technical Telemetry</strong></td>
+                <td>Submission timestamp, IP address, device user-agent string.</td>
+                <td>Security audit, duplicate submission prevention, and bot / spam deterrence.</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- 4. Lawful Purpose & Usage -->
+        <section id="p-4" class="legal-section">
+          <h2>4. Lawful Purpose and Grounds of Processing</h2>
+          <p>
+            In accordance with the DPDP Act 2023, Meridian processes your personal data on the lawful basis of your <strong>express and informed consent</strong> granted during registration:
+          </p>
+          <ul>
+            <li><strong>Administering Participation:</strong> Validating entry details and assigning entries to one of the 5 contest categories (Male, Female, Kids, Group/Family, Voice of Meridian).</li>
+            <li><strong>Evaluation by Selection Panel:</strong> Enabling the expert jury to assess video submissions against official criteria.</li>
+            <li><strong>Social Media Engagement Verification:</strong> Auditing engagement to ensure compliance with our anti-bot and anti-fraud guidelines.</li>
+            <li><strong>Winner Notification:</strong> Contacting finalists and winners via official phone, email, and Instagram channels within the 72-hour notification window.</li>
+            <li><strong>Brand Ambassador Contracting:</strong> Preparing and executing the formal 12-month honorary Brand Ambassador appointment agreements and voucher issuance.</li>
+            <li><strong>Statutory &amp; Tax Compliance:</strong> Maintaining accounting and tax compliance records for any gifted prizes or vouchers under Indian tax law.</li>
+          </ul>
+        </section>
+
+        <!-- 5. Minors & Children's Privacy -->
+        <section id="p-5" class="legal-section">
+          <h2>5. Special Protection for Children &amp; Minors (Under 18)</h2>
+          <div class="legal-callout legal-callout-success">
+            <strong>Parental Consent Mandate:</strong> Meridian enforces strict safeguards for participants under the age of 18, in full compliance with the DPDP Act 2023.
+          </div>
+          <p><strong>5.1. Verifiable Guardian Consent:</strong> Any participant below 18 years of age must participate only with the verifiable permission of a parent or legal guardian. The parent or guardian must review and approve these Terms on the minor's behalf.</p>
+          <p><strong>5.2. Prohibition of Tracking &amp; Profiling:</strong> Meridian explicitly does not undertake any tracking, behavioral monitoring, or targeted commercial advertising directed towards children.</p>
+          <p><strong>5.3. Parental Communication:</strong> All notifications, verifications, and contractual arrangements concerning a minor winner are conducted directly with their verified parent or legal guardian.</p>
+        </section>
+
+        <!-- 6. Non-Sale & Zero Sharing -->
+        <section id="p-6" class="legal-section">
+          <h2>6. Strict Non-Sale &amp; Zero Third-Party Sharing</h2>
+          <div class="legal-callout">
+            <strong>Absolute Non-Sale Guarantee:</strong> Meridian Ice Cream will NEVER sell, lease, rent, trade, or monetize your personal information to third-party marketing companies, data brokers, or advertisement networks under any circumstances.
+          </div>
+          <p>Your data is accessed only by authorized personnel on a strict need-to-know basis:</p>
+          <ul>
+            <li><strong>Jury Panel:</strong> Appointed evaluation judges reviewing submitted video links and creative entries.</li>
+            <li><strong>Technical Infrastructure Partners:</strong> Secure cloud and database hosting providers (e.g., Hostinger) bound by strict non-disclosure and security covenants.</li>
+            <li><strong>Statutory Authorities:</strong> Disclosed only if formally required by Indian law enforcement, court subpoenas, or regulatory authorities.</li>
+          </ul>
+        </section>
+
+        <!-- 7. Security & Encryption -->
+        <section id="p-7" class="legal-section">
+          <h2>7. Data Security and Technical Safeguards</h2>
+          <p>
+            Meridian implements enterprise-grade technical and organizational safeguards to protect your personal data from unauthorized access, accidental alteration, disclosure, or destruction:
+          </p>
+          <ul>
+            <li><strong>Encrypted Transport:</strong> All data transmitted between your browser and our server is secured using TLS 1.3 / HTTPS encryption.</li>
+            <li><strong>Secure Relational Database:</strong> Registrations are stored in a hardened MySQL database utilizing prepared statements to eliminate SQL injection risks.</li>
+            <li><strong>Role-Based Access Control (RBAC):</strong> Administrative access to contestant data is restricted strictly to authorized superadmin personnel with multi-factor authentication, separate from the public website.</li>
+            <li><strong>Rate Limiting &amp; Anti-Brute-Force:</strong> Submission endpoints feature IP-based rate limiting to prevent automated spam and DDoS vectors.</li>
+          </ul>
+        </section>
+
+        <!-- 8. Retention & Erasure -->
+        <section id="p-8" class="legal-section">
+          <h2>8. Data Retention Schedule</h2>
+          <p>
+            We retain personal data only for as long as necessary to fulfill the purposes for which it was collected:
+          </p>
+          <ul>
+            <li><strong>Active Contest Entries:</strong> Maintained during the active contest and evaluation timeline (18 November 2026 to 5 March 2027) plus a standard 90-day dispute resolution buffer.</li>
+            <li><strong>Brand Ambassador Records:</strong> For appointed winners, records and agreements are retained for the duration of the 12-month ambassadorship plus any statutory tax audit period required under Indian law.</li>
+            <li><strong>Secure Erasure:</strong> Following the expiration of the retention window, contestant personal records are securely purged or anonymized.</li>
+          </ul>
+        </section>
+
+        <!-- 9. Data Principal Rights -->
+        <section id="p-9" class="legal-section">
+          <h2>9. Your Rights as a Data Principal</h2>
+          <p>Under the DPDP Act 2023, you (or your parent/guardian, if under 18) possess the following statutory rights:</p>
+          <ul>
+            <li><strong>Right to Access:</strong> You may request a summary of the personal data Meridian holds concerning your contest entry.</li>
+            <li><strong>Right to Correction / Rectification:</strong> If your submitted phone number, email, or details contain typographical errors, you may request correction.</li>
+            <li><strong>Right to Withdraw Consent:</strong> You have the right to withdraw your consent at any time by contacting our Privacy Desk. <em>(Please note that withdrawing consent prior to winner selection terminates active eligibility in the contest.)</em></li>
+            <li><strong>Right to Grievance Redressal:</strong> You have the right to register complaints or seek resolution regarding the handling of your data through our designated Grievance Officer.</li>
+          </ul>
+        </section>
+
+        <!-- 10. Grievance Redressal -->
+        <section id="p-10" class="legal-section">
+          <h2>10. Grievance Redressal Officer</h2>
+          <p>
+            In compliance with Section 13 of the Contest Terms and the DPDP Act 2023, Meridian has appointed a designated Grievance Officer to address data privacy inquiries:
+          </p>
+          <div class="legal-callout" style="background: #FFFFFF; border: 1px solid var(--border-light); border-left: 4px solid var(--brand-red);">
+            <p style="margin-bottom: 6px;"><strong>Designation:</strong> Grievance Officer &mdash; Data Privacy &amp; Consumer Protection</p>
+            <p style="margin-bottom: 6px;"><strong>Organisation:</strong> Meridian Ice Cream (Chavan &amp; Sons)</p>
+            <p style="margin-bottom: 6px;"><strong>Address:</strong> S. No. 25/6/18, Nanded, Nanded Shivane Link Road, Opp. Shravani Heights, Nanded Phata, Pune &ndash; 411041, Maharashtra, India.</p>
+            <p style="margin-bottom: 6px;"><strong>Dedicated Privacy Email:</strong> <a href="mailto:privacy@meridianicecream.com" style="color: var(--brand-red); font-weight: 600;">privacy@meridianicecream.com</a></p>
+            <p style="margin-bottom: 0;"><strong>Response Window:</strong> Acknowledgement within 48 hours; resolution within 30 days as prescribed under statutory regulations.</p>
+          </div>
+        </section>
+
+        <!-- 11. Updates to Policy -->
+        <section id="p-11" class="legal-section">
+          <h2>11. Updates to this Policy</h2>
+          <p>
+            Meridian reserves the right to update this Privacy Policy to reflect changes in legal, technological, or operational standards. Any material changes will be published directly on this page with an updated &ldquo;Last Updated&rdquo; revision timestamp.
+          </p>
+        </section>
+
+      </article>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="footer-grid">
+        <div>
+          <img src="assets/official/meridian-logo-red.svg" alt="Meridian Ice Cream" style="height: 42px; width: auto; margin-bottom: 16px; filter: brightness(0) invert(1);">
+          <p style="font-size: 0.88rem; line-height: 1.6; max-width: 420px; color: #8F8880;">
+            Meridian Ice Cream &mdash; Pure Taste, Natural Delights since 1993. Chavan &amp; Sons, S. No. 25/6/18, Nanded Phata, Pune &ndash; 411041, Maharashtra, India.
+          </p>
+        </div>
+        <div>
+          <h4 class="footer-col-title">Legal &amp; Policy</h4>
+          <ul class="footer-links">
+            <li><a href="terms">Official Terms &amp; Conditions</a></li>
+            <li><a href="privacy">Privacy Policy &amp; DPDP</a></li>
+            <li><a href="./#faq">Frequently Asked Questions</a></li>
+          </ul>
+        </div>
+        <div>
+          <h4 class="footer-col-title">Contest Links</h4>
+          <ul class="footer-links">
+            <li><a href="./#categories">5 Contest Categories</a></li>
+            <li><a href="./#steps">How to Participate</a></li>
+            <li><a href="./#register">Online Registration</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <div>
+          &copy; 2026&ndash;2027 Meridian Ice Cream (Chavan &amp; Sons). All rights reserved. Brand Ambassador Contest Campaign.
+        </div>
+        <div style="display: flex; gap: 20px;">
+          <a href="./" style="color: #9C958E; text-decoration: none;">&larr; Back to Contest Home</a>
+          <a href="terms" style="color: #9C958E; text-decoration: none;">Terms &amp; Conditions</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Initialize Lucide Icons
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
+

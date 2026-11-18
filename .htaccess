@@ -1,0 +1,55 @@
+# ==============================================================================
+# Meridian Ice Cream Brand Ambassador Contest
+# Hostinger LiteSpeed / Apache Clean URL & Security Configuration
+# Domain: influencer.meridianicecreams.com
+# ==============================================================================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # 1. Canonical Redirect: Remove 'index.html' or 'index' from URL
+    RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /(.*)index(\.html)?(\?.*)?\ HTTP/ [NC]
+    RewriteRule ^(.*)index(\.html)?$ /$1 [R=301,L]
+
+    # 2. Canonical Redirect: Strip '.html' extension from external requests
+    # Example: /terms.html -> /terms, /privacy.html -> /privacy
+    RewriteCond %{THE_REQUEST} ^[A-Z]{3,9}\ /([^\ ?]+)\.html [NC]
+    RewriteRule ^ %1 [R=301,L]
+
+    # 3. Ensure trailing slash for admin folder
+    RewriteRule ^admin$ admin/ [R=301,L]
+
+    # 4. Internal Rewrite: Map clean URL to .html file if the .html file exists
+    # Example: /terms -> terms.html, /privacy -> privacy.html
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{DOCUMENT_ROOT}/$1.html -f [OR]
+    RewriteCond %{REQUEST_FILENAME}.html -f
+    RewriteRule ^([^/]+)/?$ $1.html [L,QSA]
+</IfModule>
+
+# Security: Disable directory listing
+Options -Indexes
+
+# UTF-8 Default Character Encoding
+AddDefaultCharset UTF-8
+
+# Security & Privacy Headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Protect sensitive database files and server configs
+<FilesMatch "^(meridian_contest\.db|\.env|\.git|\.htaccess|database_setup\.sql|php\.ini)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+    <IfModule !mod_authz_core.c>
+        Order deny,allow
+        Deny from all
+    </IfModule>
+</FilesMatch>
+
