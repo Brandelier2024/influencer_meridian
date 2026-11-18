@@ -661,7 +661,7 @@
     .cat-voice-theme .cat-number-badge { color: #D8232A; }
 
     .cat-image-wrapper {
-      height: 160px;
+      height: 165px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -669,15 +669,18 @@
     }
 
     .cat-image-wrapper img {
-      max-height: 140px;
-      max-width: 90%;
-      object-fit: contain;
-      transition: transform 0.3s ease;
-      filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.06));
+      width: 140px;
+      height: 140px;
+      object-fit: cover;
+      border-radius: 18px;
+      transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease;
+      box-shadow: 0 10px 22px -6px rgba(0, 0, 0, 0.12);
+      border: 3px solid #FFFFFF;
     }
 
     .contest-cat-card:hover .cat-image-wrapper img {
-      transform: scale(1.06) rotate(-2deg);
+      transform: scale(1.06) rotate(-1.5deg);
+      box-shadow: 0 16px 30px -8px rgba(216, 35, 42, 0.25);
     }
 
     .cat-card-title {
@@ -1927,13 +1930,9 @@
           </div>
           <h3 class="cat-card-title">Male Category</h3>
           <p class="cat-card-desc">Individual male participants sharing honest flavor reviews, parlour visits, and fun reactions.</p>
-          <div style="font-size: 0.76rem; color: #C2410C; background: #FFF7ED; padding: 7px 10px; border-radius: 8px; border: 1px solid #FFEDD5; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-            <i data-lucide="music" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
-            <span>You can use the official Meridian music reel or jingle!</span>
-          </div>
           <ul class="cat-criteria-list">
-            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Solo creators & enthusiasts</li>
-            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Creative reels & taste tests</li>
+            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Solo creators &amp; enthusiasts</li>
+            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Creative reels &amp; taste tests</li>
             <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> 1 Official Ambassador Winner</li>
           </ul>
           <button type="button" class="btn btn-secondary" onclick="prefillAndScrollCategory('male')" style="width: 100%; font-size: 0.88rem; padding: 10px;">
@@ -1949,13 +1948,9 @@
           </div>
           <h3 class="cat-card-title">Female Category</h3>
           <p class="cat-card-desc">Individual female participants capturing aesthetic parlour moments and genuine scoop joy.</p>
-          <div style="font-size: 0.76rem; color: #BE185D; background: #FDF2F8; padding: 7px 10px; border-radius: 8px; border: 1px solid #FCE7F3; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-            <i data-lucide="music" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
-            <span>You can use the official Meridian music reel or jingle!</span>
-          </div>
           <ul class="cat-criteria-list">
-            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Solo creators & foodies</li>
-            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Aesthetic reels & flavour vibes</li>
+            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Solo creators &amp; foodies</li>
+            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Aesthetic reels &amp; flavour vibes</li>
             <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> 1 Official Ambassador Winner</li>
           </ul>
           <button type="button" class="btn btn-secondary" onclick="prefillAndScrollCategory('female')" style="width: 100%; font-size: 0.88rem; padding: 10px;">
@@ -1970,11 +1965,7 @@
             <img src="assets/clean/category-child.png" alt="Kids Category">
           </div>
           <h3 class="cat-card-title">Kids Category</h3>
-          <p class="cat-card-desc">Parents & guardians capturing heartwarming ice cream smiles, fun expressions, and sweet treats.</p>
-          <div style="font-size: 0.76rem; color: #15803D; background: #F0FDF4; padding: 7px 10px; border-radius: 8px; border: 1px solid #DCFCE7; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-            <i data-lucide="music" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
-            <span>You can use the official Meridian music reel or jingle!</span>
-          </div>
+          <p class="cat-card-desc">Parents &amp; guardians capturing heartwarming ice cream smiles, fun expressions, and sweet treats.</p>
           <ul class="cat-criteria-list">
             <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Kids with parents or siblings</li>
             <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Weekend parlour treat stories</li>
@@ -1993,13 +1984,9 @@
           </div>
           <h3 class="cat-card-title">Group / Family</h3>
           <p class="cat-card-desc">Friends squads, family reunions, college crews, or teams sharing ice cream joy together.</p>
-          <div style="font-size: 0.76rem; color: #7E22CE; background: #FAF5FF; padding: 7px 10px; border-radius: 8px; border: 1px solid #F3E8FF; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-            <i data-lucide="music" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
-            <span>You can use the official Meridian music reel or jingle!</span>
-          </div>
           <ul class="cat-criteria-list">
             <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Groups of 2 or more people</li>
-            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Coordinated skits, cheers & fun</li>
+            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Coordinated skits, cheers &amp; fun</li>
             <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> 1 Official Ambassador Group</li>
           </ul>
           <button type="button" class="btn btn-secondary" onclick="prefillAndScrollCategory('group_family')" style="width: 100%; font-size: 0.88rem; padding: 10px;">
@@ -2010,20 +1997,18 @@
         <!-- Category 5: Voice of Meridian -->
         <div class="contest-cat-card cat-voice-theme reveal-card stagger-5">
           <div class="cat-number-badge">5</div>
-          <div class="cat-image-wrapper" style="background: radial-gradient(circle, #FEE2E2 0%, #FFFFFF 70%); border-radius: 16px;">
-            <div style="width: 88px; height: 88px; border-radius: 50%; background: #D8232A; display: flex; align-items: center; justify-content: center; color: #ffffff; box-shadow: 0 10px 25px -4px rgba(216, 35, 42, 0.4);">
-              <i data-lucide="mic" style="width: 44px; height: 44px;"></i>
-            </div>
+          <div class="cat-image-wrapper">
+            <img src="assets/clean/category-voice.png" alt="Voice of Meridian Category" style="border-radius: 14px; object-fit: cover; width: 140px; height: 140px; box-shadow: 0 8px 20px -4px rgba(216, 35, 42, 0.25);">
           </div>
           <h3 class="cat-card-title">Voice of Meridian</h3>
           <p class="cat-card-desc">Singers, vocalists, and music creators performing the Meridian jingle or creating acoustic reels.</p>
-          <div style="font-size: 0.76rem; color: #B91C1C; background: #FEF2F2; padding: 7px 10px; border-radius: 8px; border: 1px solid #FEE2E2; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-            <i data-lucide="mic-2" style="width: 14px; height: 14px; flex-shrink: 0;"></i>
-            <span>Sing our jingle or use the official music reel audio!</span>
+          <div style="font-size: 0.78rem; color: #B91C1C; background: #FEF2F2; padding: 8px 12px; border-radius: 8px; border: 1px solid #FEE2E2; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; line-height: 1.4;">
+            <i data-lucide="mic-2" style="width: 15px; height: 15px; flex-shrink: 0; color: #D8232A;"></i>
+            <span><strong>Creator Notice:</strong> You can use your official Meridian music reel or sing our jingle for Meridian!</span>
           </div>
           <ul class="cat-criteria-list">
             <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Sing the iconic Meridian jingle</li>
-            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Original musical covers & reels</li>
+            <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> Original musical covers &amp; reels</li>
             <li><i data-lucide="check" style="width: 14px; height: 14px;"></i> 1 Official "Voice of Meridian" Crown</li>
           </ul>
           <button type="button" class="btn btn-secondary" onclick="prefillAndScrollCategory('voice_of_meridian')" style="width: 100%; font-size: 0.88rem; padding: 10px;">
@@ -2504,14 +2489,14 @@
                 </label>
               </div>
 
-              <!-- Dynamic 1-Line Description Callout (Audio & Jingle Guidance) -->
-              <div id="categoryGuidanceBox" class="category-guidance-callout">
+              <!-- Dynamic 1-Line Description Callout (Audio & Jingle Guidance: Voice of Meridian Only) -->
+              <div id="categoryGuidanceBox" class="category-guidance-callout" style="display: none;">
                 <div class="guidance-icon" id="guidanceIconBox">
-                  <i data-lucide="music-2" id="guidanceIcon" style="width: 16px; height: 16px;"></i>
+                  <i data-lucide="mic-2" id="guidanceIcon" style="width: 16px; height: 16px;"></i>
                 </div>
                 <div class="guidance-text">
-                  <span class="guidance-title" id="guidanceTitle">Male Solo:</span>
-                  <span class="guidance-desc" id="guidanceDesc">Record your flavour reviews or parlour visit — <strong>you can use your official Meridian music reel or sing our jingle for Meridian!</strong></span>
+                  <span class="guidance-title" id="guidanceTitle">Voice of Meridian:</span>
+                  <span class="guidance-desc" id="guidanceDesc">You can use your official Meridian music reel or sing our jingle for Meridian!</span>
                 </div>
               </div>
             </div>
@@ -2902,35 +2887,18 @@
         liveCat.textContent = catLabels[catKey] || 'Contestant Category';
       }
 
-      // One-line dynamic description for using Meridian music reel or jingle
-      const guidanceData = {
-        'male': {
-          title: 'Male Solo Creator:',
-          desc: 'Share your flavour reviews or parlour visits — <strong>you can use your official Meridian music reel or sing our jingle for Meridian!</strong>'
-        },
-        'female': {
-          title: 'Female Solo Creator:',
-          desc: 'Showcase your aesthetic flavour moments & parlour vibes — <strong>you can use your official Meridian music reel or sing our jingle for Meridian!</strong>'
-        },
-        'kids': {
-          title: 'Kids Category:',
-          desc: 'Capture sweet smiles, first scoop treats & joyful family moments — <strong>you can use your official Meridian music reel or jingle for Meridian!</strong>'
-        },
-        'group_family': {
-          title: 'Group / Family Category:',
-          desc: 'Celebrate together with your crew, friends, or family — <strong>you can use your official Meridian music reel or sing the jingle for Meridian!</strong>'
-        },
-        'voice_of_meridian': {
-          title: 'Voice of Meridian:',
-          desc: 'Showcase your singing talent or musical cover — <strong>sing the official Meridian jingle or perform your melody using our official music reel for Meridian!</strong>'
+      // One-line dynamic guidance/disclaimer is ONLY for Voice of Meridian
+      const gBox = document.getElementById('categoryGuidanceBox');
+      if (gBox) {
+        if (catKey === 'voice_of_meridian') {
+          gBox.style.display = 'flex';
+          const gTitle = document.getElementById('guidanceTitle');
+          const gDesc = document.getElementById('guidanceDesc');
+          if (gTitle) gTitle.textContent = 'Voice of Meridian:';
+          if (gDesc) gDesc.innerHTML = 'You can use your official Meridian music reel or sing our jingle for Meridian!';
+        } else {
+          gBox.style.display = 'none';
         }
-      };
-
-      const gTitle = document.getElementById('guidanceTitle');
-      const gDesc = document.getElementById('guidanceDesc');
-      if (gTitle && gDesc && guidanceData[catKey]) {
-        gTitle.textContent = guidanceData[catKey].title;
-        gDesc.innerHTML = guidanceData[catKey].desc;
       }
     }
 
