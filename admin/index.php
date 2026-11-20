@@ -472,6 +472,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                 <option value="kids">🧒 Kids</option>
                 <option value="group_family">👥 Group / Family</option>
                 <option value="voice_of_meridian">🎙️ Voice of Meridian</option>
+                <option value="Uploaded Reels">Uploaded Reels</option>
               </select>
             </div>
 
@@ -816,6 +817,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                   <option value="kids">🧒 Kids</option>
                   <option value="group_family">👥 Group / Family</option>
                   <option value="voice_of_meridian">🎙️ Voice of Meridian</option>
+                  <option value="Uploaded Reels">Uploaded Reels</option>
                 </select>
               </div>
               <div>
