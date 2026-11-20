@@ -340,7 +340,12 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
               </div>
             </div>
             <div class="mt-4">
-              <div class="text-3xl font-heading font-black text-slate-900" id="statTotalCount">0</div>
+              <div class="flex items-baseline justify-between">
+                <div class="text-3xl font-heading font-black text-slate-900" id="statTotalCount">0</div>
+                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-pink-50 border border-pink-200 text-pink-700 text-xs font-bold" title="Contestants who inserted Instagram Reel URL">
+                  <i data-lucide="video" class="w-3.5 h-3.5"></i> <span id="statWithReelCount">0</span> Reels
+                </span>
+              </div>
               <div class="text-xs text-slate-500 mt-1 flex items-center gap-2">
                 <span class="text-emerald-600 font-bold flex items-center"><i data-lucide="trending-up"
                     class="w-3.5 h-3.5 mr-0.5"></i> Live</span>
@@ -459,8 +464,8 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
             </button>
           </div>
 
-          <!-- Row 2: 4 Modern Responsive Filter Dropdowns -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3">
+          <!-- Row 2: 5 Modern Responsive Filter Dropdowns -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3">
 
             <!-- Category Filter -->
             <div class="relative">
@@ -472,7 +477,17 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                 <option value="kids">🧒 Kids</option>
                 <option value="group_family">👥 Group / Family</option>
                 <option value="voice_of_meridian">🎙️ Voice of Meridian</option>
-                <option value="Uploaded Reels">Uploaded Reels</option>
+                <option value="Uploaded Reels">🎬 Uploaded Reels Only</option>
+              </select>
+            </div>
+
+            <!-- Instagram Reel / Video URL Filter -->
+            <div class="relative">
+              <select id="filterReel" onchange="loadEntries(1)"
+                class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none focus:border-red-600 focus:bg-white cursor-pointer transition">
+                <option value="">All Reel Submissions</option>
+                <option value="has_reel">🎬 With Reel URL</option>
+                <option value="no_reel">⏳ Without Reel URL</option>
               </select>
             </div>
 
@@ -504,7 +519,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
             </div>
 
             <!-- Sort By -->
-            <div class="relative">
+            <div class="relative col-span-2 sm:col-span-1">
               <select id="filterSort" onchange="loadEntries(1)"
                 class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none focus:border-red-600 focus:bg-white cursor-pointer transition">
                 <option value="newest">Newest First</option>
@@ -994,6 +1009,9 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
             }
             document.getElementById('statShortlistedCount').textContent = s.shortlisted || 0;
             document.getElementById('statWinnersCount').textContent = s.winners || 0;
+            if (document.getElementById('statWithReelCount')) {
+              document.getElementById('statWithReelCount').textContent = s.with_reel || 0;
+            }
             if (document.getElementById('statTodayCount')) {
               document.getElementById('statTodayCount').textContent = s.today || 0;
             }
@@ -1037,6 +1055,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
         currentPage = page;
         const search = document.getElementById('searchInput').value.trim();
         const category = document.getElementById('filterCategory').value;
+        const hasReel = document.getElementById('filterReel')?.value || '';
         const status = document.getElementById('filterStatus').value;
         const city = document.getElementById('filterCity').value;
         const sort = document.getElementById('filterSort').value;
@@ -1060,6 +1079,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
             limit: 25,
             search,
             category,
+            has_reel: hasReel,
             status,
             city,
             sort
@@ -1092,6 +1112,9 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
         document.getElementById('searchInput').value = '';
         document.getElementById('clearSearchBtn').classList.add('hidden');
         document.getElementById('filterCategory').value = '';
+        if (document.getElementById('filterReel')) {
+          document.getElementById('filterReel').value = '';
+        }
         document.getElementById('filterStatus').value = '';
         document.getElementById('filterCity').value = '';
         document.getElementById('filterSort').value = 'newest';
@@ -1592,6 +1615,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
       function exportFilteredCSV() {
         const search = document.getElementById('searchInput').value.trim();
         const category = document.getElementById('filterCategory').value;
+        const hasReel = document.getElementById('filterReel')?.value || '';
         const status = document.getElementById('filterStatus').value;
         const city = document.getElementById('filterCity').value;
 
@@ -1599,6 +1623,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
           action: 'export_csv',
           search,
           category,
+          has_reel: hasReel,
           status,
           city
         });

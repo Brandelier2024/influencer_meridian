@@ -770,6 +770,103 @@ report("18. Five Categories (Voice, Kids, Group/Family, Male, Female)",
     "Voice of Meridian found: $voiceFound, Kids: " . ($hasKids ? 'YES' : 'NO') . ", Group/Family: " . ($hasGroup ? 'YES' : 'NO')
 );
 
+// -------------------------------------------------------------
+// TEST 19: Instagram Reel URL Filter Verification (has_reel & no_reel)
+// -------------------------------------------------------------
+$codeInsertReels = <<<'PHP'
+require_once __DIR__ . '/api/config.php';
+$pdo = getDbConnection();
+
+$codeWithReel = 'M-REEL-' . random_int(100000, 999999);
+$codeNoReel   = 'M-NOREEL-' . random_int(100000, 999999);
+
+$stmt = $pdo->prepare("
+    INSERT INTO meridian_contest_entries 
+    (entry_code, full_name, mobile_number, email_address, category, video_url, city, store_code, terms_agreed, status)
+    VALUES 
+    (:cr, 'Reel Submitter', '9899001122', 'has_reel_test@internal.test', 'female', 'https://instagram.com/reel/meridian_creator_123', 'mumbai', 'MUM-01', 1, 'registered'),
+    (:cn, 'No Reel Submitter', '9899001123', 'no_reel_test@internal.test', 'male', '', 'pune', 'PUN-01', 1, 'registered')
+");
+$stmt->execute([':cr' => $codeWithReel, ':cn' => $codeNoReel]);
+
+echo json_encode(['with_reel' => $codeWithReel, 'no_reel' => $codeNoReel]);
+PHP;
+$resInsert = runPhpSubprocess($codeInsertReels);
+$insertData = json_decode($resInsert['stdout'], true);
+$targetHas = $insertData['with_reel'] ?? '';
+$targetNo  = $insertData['no_reel'] ?? '';
+
+// 1. Query has_reel=has_reel
+$codeFilterHasReel = <<<'PHP'
+session_start();
+$_SESSION['meridian_admin'] = true;
+$_SESSION['admin_user']     = 'admin';
+$_SESSION['csrf_token']     = 'test_token_123';
+$_SERVER['REQUEST_METHOD'] = 'GET';
+$_GET = ['action' => 'get_entries', 'has_reel' => 'has_reel', 'search' => 'Reel Submitter'];
+require __DIR__ . '/admin/api.php';
+PHP;
+$resHas = runPhpSubprocess($codeFilterHasReel);
+$dataHas = json_decode($resHas['stdout'], true);
+$hasCodes = array_column($dataHas['entries'] ?? [], 'entry_code');
+
+// 2. Query has_reel=no_reel
+$codeFilterNoReel = <<<'PHP'
+session_start();
+$_SESSION['meridian_admin'] = true;
+$_SESSION['admin_user']     = 'admin';
+$_SESSION['csrf_token']     = 'test_token_123';
+$_SERVER['REQUEST_METHOD'] = 'GET';
+$_GET = ['action' => 'get_entries', 'has_reel' => 'no_reel', 'search' => 'Reel Submitter'];
+require __DIR__ . '/admin/api.php';
+PHP;
+$resNo = runPhpSubprocess($codeFilterNoReel);
+$dataNo = json_decode($resNo['stdout'], true);
+$noCodes = array_column($dataNo['entries'] ?? [], 'entry_code');
+
+// 3. Query category='Uploaded Reels' (legacy dropdown option)
+$codeLegacyCat = <<<'PHP'
+session_start();
+$_SESSION['meridian_admin'] = true;
+$_SESSION['admin_user']     = 'admin';
+$_SESSION['csrf_token']     = 'test_token_123';
+$_SERVER['REQUEST_METHOD'] = 'GET';
+$_GET = ['action' => 'get_entries', 'category' => 'Uploaded Reels', 'search' => 'Reel Submitter'];
+require __DIR__ . '/admin/api.php';
+PHP;
+$resLegacy = runPhpSubprocess($codeLegacyCat);
+$dataLegacy = json_decode($resLegacy['stdout'], true);
+$legacyCodes = array_column($dataLegacy['entries'] ?? [], 'entry_code');
+
+// 4. Query stats
+$codeStatsReel = <<<'PHP'
+session_start();
+$_SESSION['meridian_admin'] = true;
+$_SESSION['admin_user']     = 'admin';
+$_SESSION['csrf_token']     = 'test_token_123';
+$_SERVER['REQUEST_METHOD'] = 'GET';
+$_GET = ['action' => 'get_stats'];
+require __DIR__ . '/admin/api.php';
+PHP;
+$resStats = runPhpSubprocess($codeStatsReel);
+$dataStats = json_decode($resStats['stdout'], true);
+$withReelStat = $dataStats['stats']['with_reel'] ?? null;
+
+$hasPassed = in_array($targetHas, $hasCodes, true) && !in_array($targetNo, $hasCodes, true);
+$noPassed = in_array($targetNo, $noCodes, true) && !in_array($targetHas, $noCodes, true);
+$legacyCatPassed = in_array($targetHas, $legacyCodes, true) && !in_array($targetNo, $legacyCodes, true);
+$statPassed = ($withReelStat !== null && $withReelStat >= 1);
+
+$reelTestSuccess = $hasPassed && $noPassed && $legacyCatPassed && $statPassed;
+
+report("19. Instagram Reel URL Filter (has_reel & no_reel)",
+    $reelTestSuccess,
+    "has_reel: " . ($hasPassed ? 'PASS' : 'FAIL') .
+    ", no_reel: " . ($noPassed ? 'PASS' : 'FAIL') .
+    ", category='Uploaded Reels': " . ($legacyCatPassed ? 'PASS' : 'FAIL') .
+    ", with_reel stat: " . ($withReelStat ?? 'MISSING')
+);
+
 // Clean up test data after run
 runPhpSubprocess($codeClean);
 

@@ -232,6 +232,8 @@ if ($action === 'get_stats') {
         'today'           => 0,
         'shortlisted'     => 0,
         'winners'         => 0,
+        'with_reel'       => 0,
+        'without_reel'    => 0,
         'categories'      => [
             'male'              => 0,
             'female'            => 0,
@@ -280,6 +282,10 @@ if ($action === 'get_stats') {
             $stmt = $pdo->query("SELECT COUNT(*) as cnt FROM meridian_contest_entries WHERE DATE(created_at) = CURRENT_DATE");
             $stats['today'] = (int)($stmt->fetch()['cnt'] ?? 0);
 
+            $stmt = $pdo->query("SELECT COUNT(*) as cnt FROM meridian_contest_entries WHERE video_url IS NOT NULL AND TRIM(video_url) != '' AND video_url != '-'");
+            $stats['with_reel'] = (int)($stmt->fetch()['cnt'] ?? 0);
+            $stats['without_reel'] = max(0, $stats['total'] - $stats['with_reel']);
+
             $stmt = $pdo->query("SELECT city, COUNT(*) as cnt FROM meridian_contest_entries GROUP BY city ORDER BY cnt DESC LIMIT 10");
             $stats['cities'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -308,6 +314,7 @@ if ($action === 'get_entries') {
     $status   = trim($_GET['status'] ?? '');
     $city     = trim($_GET['city'] ?? '');
     $sort     = trim($_GET['sort'] ?? 'newest');
+    $hasReel  = trim($_GET['has_reel'] ?? $_GET['reel'] ?? '');
 
     $entries = [];
     $total = 0;
@@ -323,13 +330,23 @@ if ($action === 'get_entries') {
             }
 
             if (!empty($category)) {
-                if ($category === 'kids' || $category === 'child') {
+                if ($category === 'Uploaded Reels' || $category === 'uploaded_reels' || $category === 'reels') {
+                    $whereClauses[] = "(video_url IS NOT NULL AND TRIM(video_url) != '' AND video_url != '-')";
+                } elseif ($category === 'kids' || $category === 'child') {
                     $whereClauses[] = "(category = 'kids' OR category = 'child')";
                 } elseif ($category === 'group_family' || $category === 'group' || $category === 'family') {
                     $whereClauses[] = "(category = 'group_family' OR category = 'group' OR category = 'family')";
                 } elseif (in_array($category, ['male', 'female', 'voice_of_meridian'], true)) {
                     $whereClauses[] = "category = :cat";
                     $params[':cat'] = $category;
+                }
+            }
+
+            if (!empty($hasReel)) {
+                if ($hasReel === 'yes' || $hasReel === '1' || $hasReel === 'has_reel') {
+                    $whereClauses[] = "(video_url IS NOT NULL AND TRIM(video_url) != '' AND video_url != '-')";
+                } elseif ($hasReel === 'no' || $hasReel === '0' || $hasReel === 'no_reel') {
+                    $whereClauses[] = "(video_url IS NULL OR TRIM(video_url) = '' OR video_url = '-')";
                 }
             }
 
@@ -653,6 +670,7 @@ if ($action === 'export_csv') {
     $category = trim($_GET['category'] ?? '');
     $status   = trim($_GET['status'] ?? '');
     $city     = trim($_GET['city'] ?? '');
+    $hasReel  = trim($_GET['has_reel'] ?? $_GET['reel'] ?? '');
 
     $entries = [];
 
@@ -666,13 +684,22 @@ if ($action === 'export_csv') {
                 $params[':s'] = '%' . $search . '%';
             }
             if (!empty($category)) {
-                if ($category === 'kids' || $category === 'child') {
+                if ($category === 'Uploaded Reels' || $category === 'uploaded_reels' || $category === 'reels') {
+                    $whereClauses[] = "(video_url IS NOT NULL AND TRIM(video_url) != '' AND video_url != '-')";
+                } elseif ($category === 'kids' || $category === 'child') {
                     $whereClauses[] = "(category = 'kids' OR category = 'child')";
                 } elseif ($category === 'group_family' || $category === 'group' || $category === 'family') {
                     $whereClauses[] = "(category = 'group_family' OR category = 'group' OR category = 'family')";
                 } elseif (in_array($category, ['male', 'female', 'voice_of_meridian'], true)) {
                     $whereClauses[] = "category = :cat";
                     $params[':cat'] = $category;
+                }
+            }
+            if (!empty($hasReel)) {
+                if ($hasReel === 'yes' || $hasReel === '1' || $hasReel === 'has_reel') {
+                    $whereClauses[] = "(video_url IS NOT NULL AND TRIM(video_url) != '' AND video_url != '-')";
+                } elseif ($hasReel === 'no' || $hasReel === '0' || $hasReel === 'no_reel') {
+                    $whereClauses[] = "(video_url IS NULL OR TRIM(video_url) = '' OR video_url = '-')";
                 }
             }
             if (!empty($status) && in_array($status, ['registered', 'under_review', 'shortlisted', 'winner', 'rejected'], true)) {

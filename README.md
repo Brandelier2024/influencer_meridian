@@ -52,7 +52,7 @@ All official assets were fetched from `https://meridianicecreams.com` and integr
 5. **3 Simple Steps:** Register, Create, and Follow Contest Rules.
 6. **Official Flavours & Specialities (New):** Showcasing real products from `meridianicecreams.com` (*Strawberry with Cream, Real Alphonso, Belgian Chocolate, Sitaphal, Royal Mastani, Sizzling Brownie*).
 7. **Vendor & Store Staff Guide:** Staff guidance, official parlour network map (`Meredian-map-01-1.svg`), and **"Zero Paperwork — 100% Digital"** guarantee.
-8. **Ambassador Perks:** 1 Year Free Ice Cream, nationwide billboard feature, pro studio photoshoot, and varsity merchandise kit.
+8. **Ambassador Perks:** Free Ice Cream Vouchers, nationwide billboard feature, pro studio photoshoot, and varsity merchandise kit.
 9. **Interactive VIP Pass & Registration:** Live updating contestant badge that renders the participant's name and category live with confetti celebration on submit.
 10. **Community Wall & FAQ Accordion:** Common questions and rules.
 

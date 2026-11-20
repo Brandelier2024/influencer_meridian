@@ -49,6 +49,7 @@ if (empty($providedKey) || !hash_equals(ADMIN_SECRET_KEY, $providedKey)) {
 
 $format = strtolower(trim($_GET['format'] ?? 'csv'));
 $categoryFilter = strtolower(trim($_GET['category'] ?? ''));
+$hasReel = strtolower(trim($_GET['has_reel'] ?? $_GET['reel'] ?? ''));
 
 $pdo = getDbConnection();
 $entries = [];
@@ -56,16 +57,29 @@ $entries = [];
 if ($pdo) {
     try {
         $sql = "SELECT id, entry_code, full_name, mobile_number, email_address, category, video_url, city, store_code, instagram_handle, status, created_at FROM meridian_contest_entries";
+        $where = [];
         $params = [];
         if (!empty($categoryFilter)) {
-            if ($categoryFilter === 'kids' || $categoryFilter === 'child') {
-                $sql .= " WHERE (category = 'kids' OR category = 'child')";
+            if ($categoryFilter === 'uploaded reels' || $categoryFilter === 'uploaded_reels' || $categoryFilter === 'reels') {
+                $where[] = "(video_url IS NOT NULL AND TRIM(video_url) != '' AND video_url != '-')";
+            } elseif ($categoryFilter === 'kids' || $categoryFilter === 'child') {
+                $where[] = "(category = 'kids' OR category = 'child')";
             } elseif ($categoryFilter === 'group_family' || $categoryFilter === 'group' || $categoryFilter === 'family') {
-                $sql .= " WHERE (category = 'group_family' OR category = 'group' OR category = 'family')";
+                $where[] = "(category = 'group_family' OR category = 'group' OR category = 'family')";
             } elseif (in_array($categoryFilter, ['male', 'female', 'voice_of_meridian'], true)) {
-                $sql .= " WHERE category = :category";
+                $where[] = "category = :category";
                 $params[':category'] = $categoryFilter;
             }
+        }
+        if (!empty($hasReel)) {
+            if ($hasReel === 'yes' || $hasReel === '1' || $hasReel === 'has_reel') {
+                $where[] = "(video_url IS NOT NULL AND TRIM(video_url) != '' AND video_url != '-')";
+            } elseif ($hasReel === 'no' || $hasReel === '0' || $hasReel === 'no_reel') {
+                $where[] = "(video_url IS NULL OR TRIM(video_url) = '' OR video_url = '-')";
+            }
+        }
+        if (!empty($where)) {
+            $sql .= " WHERE " . implode(' AND ', $where);
         }
         $sql .= " ORDER BY id DESC";
 
