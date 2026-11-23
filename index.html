@@ -2205,7 +2205,8 @@
           </div>
           <h4 class="journey-step-title">Create & Share</h4>
           <p class="journey-step-text">Shoot a photo or reel featuring Meridian scoops with
-            <strong>#FaceOfMeridian</strong>.</p>
+            <strong>#FaceOfMeridian</strong>.
+          </p>
         </div>
 
         <!-- Step 5 -->
@@ -2504,7 +2505,8 @@
         <div class="perk-card reveal-card stagger-2">
           <div class="perk-icon-circle"><i data-lucide="ice-cream" style="width: 24px; height: 24px;"></i></div>
           <h3 class="perk-title">Free Ice Cream Vouchers</h3>
-          <p class="perk-desc">Enjoy your favorite tubs, scoops, sundaes, and waffle cones with exclusive Meridian Ice Cream product vouchers on the house.</p>
+          <p class="perk-desc">Enjoy your favorite tubs, scoops, sundaes, and waffle cones with exclusive Meridian Ice
+            Cream product vouchers on the house.</p>
         </div>
 
         <div class="perk-card reveal-card stagger-3">
@@ -2682,18 +2684,18 @@
             <div class="form-grid-dual">
               <div class="form-group-item">
                 <label class="form-label-title" for="instagramInput">
-                  Instagram Handle <span style="font-weight: 400; color: var(--text-muted);">(Optional)</span>
+                  Instagram Handle <span style="color: var(--brand-red);">*</span>
                 </label>
                 <input type="text" id="instagramInput" name="instagram_handle" class="form-input-field"
-                  placeholder="@yourhandle">
+                  placeholder="@yourhandle" required>
               </div>
 
               <div class="form-group-item">
                 <label class="form-label-title" for="videoLinkInput">
-                  Reel / Video URL <span style="font-weight: 400; color: var(--text-muted);">(Optional now)</span>
+                  Reel / Video URL <span style="color: var(--brand-red);">*</span>
                 </label>
                 <input type="url" id="videoLinkInput" name="video_url" class="form-input-field"
-                  placeholder="https://instagram.com/reel/...">
+                  placeholder="https://instagram.com/reel/..." required>
               </div>
             </div>
 
@@ -2754,27 +2756,37 @@
     <div class="success-modal-box">
       <div
         style="width: 68px; height: 68px; border-radius: 50%; background: #DCFCE7; color: #16A34A; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
-        <i data-lucide="check" style="width: 36px; height: 36px;"></i>
+        <i data-lucide="check-circle-2" style="width: 36px; height: 36px;"></i>
       </div>
       <h3 style="font-size: 1.85rem; margin-bottom: 8px;">Registration Confirmed!</h3>
-      <p style="color: var(--text-body); font-size: 0.98rem; margin-bottom: 20px;">
+      <p style="color: var(--text-body); font-size: 0.98rem; margin-bottom: 16px;">
         Congratulations, <strong id="modalApplicantName">Creator</strong>! Your official entry pass <strong
-          id="modalEntryId">#M-2026</strong> is saved in the Meridian contest database.
+          id="modalEntryId">#M-2026</strong> has been recorded in the contest database.
       </p>
 
+      <!-- Confirmation Email Dispatched Alert -->
       <div
-        style="background: var(--cream-warm); border: 1.5px solid #FED7AA; border-radius: var(--radius-md); padding: 16px; text-align: left; margin-bottom: 24px;">
-        <div
-          style="font-size: 0.78rem; font-weight: 800; color: #D97706; text-transform: uppercase; margin-bottom: 4px;">
-          Next Step:</div>
-        <div style="font-size: 0.9rem; color: var(--text-dark);">
-          Shoot your reel featuring your favorite Meridian scoop or cone, tag <strong>@MeridianIceCream</strong> and use
-          <strong>#FaceOfMeridian</strong> on Instagram!
+        style="background: #F0FDF4; border: 1.5px solid #BBF7D0; border-radius: var(--radius-md); padding: 12px 14px; display: flex; align-items: center; gap: 10px; margin-bottom: 14px; text-align: left;">
+        <i data-lucide="mail-check" style="width: 22px; height: 22px; color: #16A34A; flex-shrink: 0;"></i>
+        <div style="font-size: 0.88rem; color: #166534; line-height: 1.4;">
+          A confirmation email has been sent to your email address with your official ticket pass and entry details.
         </div>
       </div>
 
-      <button type="button" class="btn btn-primary" style="width: 100%;" onclick="closeSuccessModal()">
-        Awesome, Let's Create!
+      <!-- What Happens Next -->
+      <div
+        style="background: var(--cream-warm); border: 1.5px solid #FED7AA; border-radius: var(--radius-md); padding: 16px; text-align: left; margin-bottom: 22px;">
+        <div
+          style="font-size: 0.78rem; font-weight: 800; color: #D97706; text-transform: uppercase; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+          <i data-lucide="sparkles" style="width: 14px; height: 14px;"></i> What Happens Next?
+        </div>
+        <div style="font-size: 0.88rem; color: var(--text-dark); line-height: 1.5;">
+          Our creative jury is currently reviewing all submitted reels and entries. Please keep your Instagram profile public and stay tuned for shortlist updates via email and Instagram DM!
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-primary" style="width: 100%; padding: 14px; font-size: 0.98rem;" onclick="closeSuccessModal()">
+        Got It, Thank You!
       </button>
     </div>
   </div>

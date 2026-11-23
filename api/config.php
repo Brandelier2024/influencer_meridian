@@ -28,6 +28,11 @@ define('DB_CHARSET', 'utf8mb4');
 // Admin Passkey for Exporting Contestant CSV (api/export.php)
 define('ADMIN_SECRET_KEY', getenv('ADMIN_SECRET_KEY') ?: 'MeridianAdmin2026');
 
+// Contest Notification Mail Settings
+define('MAIL_FROM_EMAIL', getenv('MAIL_FROM_EMAIL') ?: 'contest@meridianicecreams.com');
+define('MAIL_FROM_NAME', getenv('MAIL_FROM_NAME') ?: 'Meridian Brand Ambassador Contest');
+define('MAIL_REPLY_TO', getenv('MAIL_REPLY_TO') ?: 'support@meridianicecreams.com');
+
 // Initial Superadmin Seed Credentials (Used ONLY on fresh database installation to seed meridian_admin_users)
 define('SUPERADMIN_DEFAULT_USER', getenv('SUPERADMIN_DEFAULT_USER') ?: 'admin');
 define('SUPERADMIN_DEFAULT_PASS', getenv('SUPERADMIN_DEFAULT_PASS') ?: 'Meridian@Super2026');

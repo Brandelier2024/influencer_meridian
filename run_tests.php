@@ -704,6 +704,7 @@ $_POST = [
     'email_address'    => 'aarav.voice@internal.test',
     'category'         => 'voice_of_meridian',
     'video_url'        => 'https://instagram.com/reel/meridian_jingle_singing',
+    'instagram_handle' => '@aarav_singer',
     'city'             => 'pune',
     'terms_agreed'     => '1'
 ];
@@ -865,6 +866,79 @@ report("19. Instagram Reel URL Filter (has_reel & no_reel)",
     ", no_reel: " . ($noPassed ? 'PASS' : 'FAIL') .
     ", category='Uploaded Reels': " . ($legacyCatPassed ? 'PASS' : 'FAIL') .
     ", with_reel stat: " . ($withReelStat ?? 'MISSING')
+);
+
+// -------------------------------------------------------------
+// TEST 20: Required Instagram Handle & Reel URL Validation Gate
+// -------------------------------------------------------------
+// Case A: Missing Instagram Handle
+$codeNoIg = <<<'PHP'
+$_SERVER['REQUEST_METHOD'] = 'POST';
+$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+$_POST = [
+    'full_name'        => 'Test User A',
+    'mobile_number'    => '9800112233',
+    'email_address'    => 'test_user_a@internal.test',
+    'category'         => 'male',
+    'video_url'        => 'https://instagram.com/reel/valid123',
+    'city'             => 'pune',
+    'terms_agreed'     => '1'
+];
+require __DIR__ . '/api/register.php';
+PHP;
+$resNoIg = runPhpSubprocess($codeNoIg);
+$dataNoIg = json_decode($resNoIg['stdout'], true);
+$noIgBlocked = ($dataNoIg['success'] ?? false) === false
+            && in_array('Instagram handle is required.', $dataNoIg['errors'] ?? [], true);
+
+// Case B: Missing Reel URL
+$codeNoReel = <<<'PHP'
+$_SERVER['REQUEST_METHOD'] = 'POST';
+$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+$_POST = [
+    'full_name'        => 'Test User B',
+    'mobile_number'    => '9800112234',
+    'email_address'    => 'test_user_b@internal.test',
+    'category'         => 'female',
+    'instagram_handle' => '@testuser_b',
+    'city'             => 'pune',
+    'terms_agreed'     => '1'
+];
+require __DIR__ . '/api/register.php';
+PHP;
+$resNoReel = runPhpSubprocess($codeNoReel);
+$dataNoReel = json_decode($resNoReel['stdout'], true);
+$noReelBlocked = ($dataNoReel['success'] ?? false) === false
+              && in_array('Reel / Video URL is required.', $dataNoReel['errors'] ?? [], true);
+
+// Case C: Invalid Reel URL format
+$codeInvalidUrl = <<<'PHP'
+$_SERVER['REQUEST_METHOD'] = 'POST';
+$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+$_POST = [
+    'full_name'        => 'Test User C',
+    'mobile_number'    => '9800112235',
+    'email_address'    => 'test_user_c@internal.test',
+    'category'         => 'kids',
+    'instagram_handle' => '@testuser_c',
+    'video_url'        => 'not_a_valid_url',
+    'city'             => 'pune',
+    'terms_agreed'     => '1'
+];
+require __DIR__ . '/api/register.php';
+PHP;
+$resInvalidUrl = runPhpSubprocess($codeInvalidUrl);
+$dataInvalidUrl = json_decode($resInvalidUrl['stdout'], true);
+$invalidBlocked = ($dataInvalidUrl['success'] ?? false) === false
+               && count(array_filter($dataInvalidUrl['errors'] ?? [], fn($e) => str_contains($e, 'Invalid video URL'))) > 0;
+
+$validationGatePassed = $noIgBlocked && $noReelBlocked && $invalidBlocked;
+
+report("20. Required Fields Gate (Instagram & Reel URL)",
+    $validationGatePassed,
+    "Missing IG blocked: " . ($noIgBlocked ? 'YES' : 'NO') .
+    ", Missing Reel blocked: " . ($noReelBlocked ? 'YES' : 'NO') .
+    ", Malformed URL blocked: " . ($invalidBlocked ? 'YES' : 'NO')
 );
 
 // Clean up test data after run
