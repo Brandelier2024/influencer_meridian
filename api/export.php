@@ -49,6 +49,7 @@ if (empty($providedKey) || !hash_equals(ADMIN_SECRET_KEY, $providedKey)) {
 
 $format = strtolower(trim($_GET['format'] ?? 'csv'));
 $categoryFilter = strtolower(trim($_GET['category'] ?? ''));
+$statusFilter = strtolower(trim($_GET['status'] ?? ''));
 $hasReel = strtolower(trim($_GET['has_reel'] ?? $_GET['reel'] ?? ''));
 
 $pdo = getDbConnection();
@@ -70,6 +71,10 @@ if ($pdo) {
                 $where[] = "category = :category";
                 $params[':category'] = $categoryFilter;
             }
+        }
+        if (!empty($statusFilter) && in_array($statusFilter, ['registered', 'under_review', 'shortlisted', 'winner', 'rejected', 'archived'], true)) {
+            $where[] = "status = :status";
+            $params[':status'] = $statusFilter;
         }
         if (!empty($hasReel)) {
             if ($hasReel === 'yes' || $hasReel === '1' || $hasReel === 'has_reel') {

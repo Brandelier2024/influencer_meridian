@@ -223,6 +223,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_SESSION['meridian_admin'])
 
 $pdo = getDbConnection();
 
+/**
+ * Calculate completeness score and missing fields for an entry
+ * Treats entry as complete (Original) when all core fields are filled.
+ */
+function calculateEntryCompleteness($entry)
+{
+    $score = 0;
+    $missing = [];
+
+    $reel = trim($entry['video_url'] ?? '');
+    if (!empty($reel) && $reel !== '-' && filter_var($reel, FILTER_VALIDATE_URL)) {
+        $score += 35;
+    } else {
+        $missing[] = 'Reel URL';
+    }
+
+    $ig = trim($entry['instagram_handle'] ?? '');
+    if (!empty($ig) && $ig !== '-') {
+        $score += 20;
+    } else {
+        $missing[] = 'Instagram Handle';
+    }
+
+    $name = trim($entry['full_name'] ?? '');
+    if (!empty($name) && strlen($name) >= 3) {
+        $score += 15;
+    } else {
+        $missing[] = 'Full Name';
+    }
+
+    $mobile = preg_replace('/[^0-9]/', '', $entry['mobile_number'] ?? '');
+    if (strlen($mobile) === 10) {
+        $score += 15;
+    } else {
+        $missing[] = 'Mobile Number';
+    }
+
+    $email = trim($entry['email_address'] ?? '');
+    if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $score += 10;
+    } else {
+        $missing[] = 'Email Address';
+    }
+
+    $city = trim($entry['city'] ?? '');
+    if (!empty($city) && $city !== 'other') {
+        $score += 5;
+    }
+
+    return [
+        'score'          => $score,
+        'is_complete'    => empty($missing),
+        'missing_fields' => $missing
+    ];
+}
+
 // -------------------------------------------------------------
 // ACTION: GET STATS (From Live Database)
 // -------------------------------------------------------------
@@ -234,6 +290,8 @@ if ($action === 'get_stats') {
         'winners'         => 0,
         'with_reel'       => 0,
         'without_reel'    => 0,
+        'archived'        => 0,
+        'duplicate_clusters' => 0,
         'categories'      => [
             'male'              => 0,
             'female'            => 0,
@@ -243,7 +301,7 @@ if ($action === 'get_stats') {
             'child'             => 0,
             'group'             => 0
         ],
-        'statuses'        => ['registered' => 0, 'under_review' => 0, 'shortlisted' => 0, 'winner' => 0, 'rejected' => 0],
+        'statuses'        => ['registered' => 0, 'under_review' => 0, 'shortlisted' => 0, 'winner' => 0, 'rejected' => 0, 'archived' => 0],
         'cities'          => [],
         'active_parlours' => 0,
         'db_driver'       => ($pdo ? $pdo->getAttribute(PDO::ATTR_DRIVER_NAME) : 'disconnected')
@@ -263,6 +321,7 @@ if ($action === 'get_stats') {
 
             $stats['shortlisted'] = $stats['statuses']['shortlisted'] ?? 0;
             $stats['winners'] = $stats['statuses']['winner'] ?? 0;
+            $stats['archived'] = $stats['statuses']['archived'] ?? 0;
 
             $stmt = $pdo->query("SELECT category, COUNT(*) as cnt FROM meridian_contest_entries GROUP BY category");
             while ($row = $stmt->fetch()) {
@@ -285,6 +344,16 @@ if ($action === 'get_stats') {
             $stmt = $pdo->query("SELECT COUNT(*) as cnt FROM meridian_contest_entries WHERE video_url IS NOT NULL AND TRIM(video_url) != '' AND video_url != '-'");
             $stats['with_reel'] = (int)($stmt->fetch()['cnt'] ?? 0);
             $stats['without_reel'] = max(0, $stats['total'] - $stats['with_reel']);
+
+            // Duplicate clusters count (same mobile_number, not yet archived)
+            $dupStmt = $pdo->query("
+                SELECT COUNT(*) as cnt FROM (
+                    SELECT mobile_number FROM meridian_contest_entries 
+                    WHERE mobile_number IS NOT NULL AND TRIM(mobile_number) != '' AND status != 'archived'
+                    GROUP BY mobile_number HAVING COUNT(*) > 1
+                ) t
+            ");
+            $stats['duplicate_clusters'] = (int)($dupStmt ? $dupStmt->fetch()['cnt'] : 0);
 
             $stmt = $pdo->query("SELECT city, COUNT(*) as cnt FROM meridian_contest_entries GROUP BY city ORDER BY cnt DESC LIMIT 10");
             $stats['cities'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -350,7 +419,12 @@ if ($action === 'get_entries') {
                 }
             }
 
-            if (!empty($status) && in_array($status, ['registered', 'under_review', 'shortlisted', 'winner', 'rejected'], true)) {
+            $duplicatesOnly = !empty($_GET['duplicates_only']) || ($sort === 'duplicates');
+            if ($duplicatesOnly) {
+                $whereClauses[] = "mobile_number IN (SELECT mobile_number FROM meridian_contest_entries WHERE mobile_number IS NOT NULL AND TRIM(mobile_number) != '' GROUP BY mobile_number HAVING COUNT(*) > 1)";
+            }
+
+            if (!empty($status) && in_array($status, ['registered', 'under_review', 'shortlisted', 'winner', 'rejected', 'archived'], true)) {
                 $whereClauses[] = "status = :st";
                 $params[':st'] = $status;
             }
@@ -366,6 +440,9 @@ if ($action === 'get_entries') {
             if ($sort === 'oldest') $orderSql = ' ORDER BY id ASC ';
             if ($sort === 'name_asc') $orderSql = ' ORDER BY full_name ASC ';
             if ($sort === 'name_desc') $orderSql = ' ORDER BY full_name DESC ';
+            if ($sort === 'duplicates') {
+                $orderSql = ' ORDER BY mobile_number ASC, (CASE WHEN video_url IS NOT NULL AND TRIM(video_url) != "" AND video_url != "-" THEN 0 ELSE 1 END) ASC, id ASC ';
+            }
 
             $countStmt = $pdo->prepare("SELECT COUNT(*) FROM meridian_contest_entries" . $whereSql);
             $countStmt->execute($params);
@@ -381,6 +458,33 @@ if ($action === 'get_entries') {
             $fetchStmt->execute();
 
             $entries = $fetchStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Annotate entries with completeness score and duplicate cluster data
+            $mobileCounts = [];
+            if (!empty($entries)) {
+                $mobiles = array_unique(array_filter(array_column($entries, 'mobile_number')));
+                if (!empty($mobiles)) {
+                    $inMobiles = implode(',', array_fill(0, count($mobiles), '?'));
+                    $cStmt = $pdo->prepare("SELECT mobile_number, COUNT(*) as cnt FROM meridian_contest_entries WHERE mobile_number IN ($inMobiles) GROUP BY mobile_number");
+                    $cStmt->execute(array_values($mobiles));
+                    while ($r = $cStmt->fetch(PDO::FETCH_ASSOC)) {
+                        $mobileCounts[$r['mobile_number']] = (int)$r['cnt'];
+                    }
+                }
+            }
+
+            foreach ($entries as &$ent) {
+                $comp = calculateEntryCompleteness($ent);
+                $mob = $ent['mobile_number'] ?? '';
+                $dupCount = $mobileCounts[$mob] ?? 1;
+
+                $ent['completeness_score'] = $comp['score'];
+                $ent['is_complete']        = $comp['is_complete'];
+                $ent['missing_fields']     = $comp['missing_fields'];
+                $ent['is_duplicate']       = ($dupCount > 1);
+                $ent['duplicate_count']    = $dupCount;
+            }
+            unset($ent);
 
         } catch (PDOException $e) {
             error_log("Get entries error: " . $e->getMessage());
@@ -432,7 +536,7 @@ if ($action === 'update_status') {
     $id = (int)($data['id'] ?? 0);
     $status = strtolower(trim($data['status'] ?? ''));
 
-    $validStatuses = ['registered', 'under_review', 'shortlisted', 'winner', 'rejected'];
+    $validStatuses = ['registered', 'under_review', 'shortlisted', 'winner', 'rejected', 'archived'];
     if (!$pdo || $id <= 0 || !in_array($status, $validStatuses, true)) {
         http_response_code(400);
         echo json_encode(['success' => false, 'message' => 'Invalid parameters for status update']);
@@ -569,7 +673,7 @@ if ($action === 'bulk_action') {
 
     if ($subAction === 'status_update') {
         $status = strtolower(trim($data['status'] ?? ''));
-        if (!in_array($status, ['registered', 'under_review', 'shortlisted', 'winner', 'rejected'], true)) {
+        if (!in_array($status, ['registered', 'under_review', 'shortlisted', 'winner', 'rejected', 'archived'], true)) {
             http_response_code(400);
             echo json_encode(['success' => false, 'message' => 'Invalid status selected.']);
             exit;
@@ -582,8 +686,152 @@ if ($action === 'bulk_action') {
         exit;
     }
 
+    if ($subAction === 'archive') {
+        $stmt = $pdo->prepare("UPDATE meridian_contest_entries SET status = 'archived' WHERE id IN ($placeholders)");
+        $stmt->execute($intIds);
+        echo json_encode(['success' => true, 'message' => count($intIds) . ' entries moved to Archive.']);
+        exit;
+    }
+
+    if ($subAction === 'unarchive') {
+        $stmt = $pdo->prepare("UPDATE meridian_contest_entries SET status = 'registered' WHERE id IN ($placeholders)");
+        $stmt->execute($intIds);
+        echo json_encode(['success' => true, 'message' => count($intIds) . ' entries restored from Archive.']);
+        exit;
+    }
+
     http_response_code(400);
     echo json_encode(['success' => false, 'message' => 'Unknown bulk action.']);
+    exit;
+}
+
+// -------------------------------------------------------------
+// ACTION: MERGE & ARCHIVE DUPLICATES
+// Logic:
+// 1. Identifies all duplicate clusters by mobile number (or email).
+// 2. Scores completeness (checks all fields submitted). The most complete entry is crowned Original (Primary).
+// 3. Backfills any missing fields (Reel URL, handle, store code) from duplicates into the Original.
+// 4. Sets status = 'archived' on all redundant/incomplete duplicate copies.
+// -------------------------------------------------------------
+if ($action === 'merge_and_archive_duplicates') {
+    if (!$pdo) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'message' => 'Database unavailable.']);
+        exit;
+    }
+
+    $findDupsStmt = $pdo->query("
+        SELECT mobile_number, COUNT(*) as cnt 
+        FROM meridian_contest_entries 
+        WHERE mobile_number IS NOT NULL AND TRIM(mobile_number) != '' AND status != 'archived'
+        GROUP BY mobile_number 
+        HAVING COUNT(*) > 1
+    ");
+    $duplicateGroups = $findDupsStmt ? $findDupsStmt->fetchAll(PDO::FETCH_ASSOC) : [];
+
+    $totalClusters = count($duplicateGroups);
+    $totalMergedFields = 0;
+    $archivedIds = [];
+
+    foreach ($duplicateGroups as $group) {
+        $mobile = $group['mobile_number'];
+        $fetchStmt = $pdo->prepare("
+            SELECT * FROM meridian_contest_entries 
+            WHERE mobile_number = :mobile AND status != 'archived'
+            ORDER BY id ASC
+        ");
+        $fetchStmt->execute([':mobile' => $mobile]);
+        $rows = $fetchStmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (count($rows) <= 1) continue;
+
+        // Score each row for completeness
+        $scored = [];
+        foreach ($rows as $row) {
+            $comp = calculateEntryCompleteness($row);
+            $scored[] = [
+                'row'         => $row,
+                'score'       => $comp['score'],
+                'is_complete' => $comp['is_complete']
+            ];
+        }
+
+        // Sort: highest completeness score first, then earliest id
+        usort($scored, function($a, $b) {
+            if ($a['score'] !== $b['score']) {
+                return $b['score'] <=> $a['score'];
+            }
+            return $a['row']['id'] <=> $b['row']['id'];
+        });
+
+        // The best / most complete entry is Primary (Original)
+        $primary = $scored[0]['row'];
+        $primaryId = (int)$primary['id'];
+
+        $updateCols = [];
+        $updateParams = [':pid' => $primaryId];
+
+        // Check if secondary rows have any missing fields that primary doesn't have
+        for ($i = 1; $i < count($scored); $i++) {
+            $sec = $scored[$i]['row'];
+            $secId = (int)$sec['id'];
+            $archivedIds[] = $secId;
+
+            // Check Reel URL
+            $pReel = trim($primary['video_url'] ?? '');
+            $sReel = trim($sec['video_url'] ?? '');
+            if ((empty($pReel) || $pReel === '-') && (!empty($sReel) && $sReel !== '-')) {
+                $updateCols[] = "`video_url` = :vurl";
+                $updateParams[':vurl'] = $sReel;
+                $primary['video_url'] = $sReel;
+                $totalMergedFields++;
+            }
+
+            // Check Instagram Handle
+            $pIg = trim($primary['instagram_handle'] ?? '');
+            $sIg = trim($sec['instagram_handle'] ?? '');
+            if ((empty($pIg) || $pIg === '-') && (!empty($sIg) && $sIg !== '-')) {
+                $updateCols[] = "`instagram_handle` = :ighandle";
+                $updateParams[':ighandle'] = $sIg;
+                $primary['instagram_handle'] = $sIg;
+                $totalMergedFields++;
+            }
+
+            // Check Store Code
+            $pStore = trim($primary['store_code'] ?? '');
+            $sStore = trim($sec['store_code'] ?? '');
+            if (($pStore === 'GENERAL' || empty($pStore)) && (!empty($sStore) && $sStore !== 'GENERAL')) {
+                $updateCols[] = "`store_code` = :scode";
+                $updateParams[':scode'] = $sStore;
+                $primary['store_code'] = $sStore;
+                $totalMergedFields++;
+            }
+        }
+
+        // Update primary if any fields were backfilled
+        if (!empty($updateCols)) {
+            $upSql = "UPDATE meridian_contest_entries SET " . implode(', ', $updateCols) . " WHERE id = :pid";
+            $upStmt = $pdo->prepare($upSql);
+            $upStmt->execute($updateParams);
+        }
+    }
+
+    // Now archive all incomplete / secondary duplicate IDs
+    if (!empty($archivedIds)) {
+        $placeholders = implode(',', array_fill(0, count($archivedIds), '?'));
+        $archStmt = $pdo->prepare("UPDATE meridian_contest_entries SET status = 'archived' WHERE id IN ($placeholders)");
+        $archStmt->execute($archivedIds);
+    }
+
+    echo json_encode([
+        'success'             => true,
+        'clusters_found'      => $totalClusters,
+        'archived_count'      => count($archivedIds),
+        'merged_fields_count' => $totalMergedFields,
+        'message'             => count($archivedIds) > 0 
+            ? "Successfully merged $totalMergedFields missing field(s) into original entries and archived " . count($archivedIds) . " duplicate submissions."
+            : "No duplicate records to archive."
+    ]);
     exit;
 }
 
@@ -702,7 +950,7 @@ if ($action === 'export_csv') {
                     $whereClauses[] = "(video_url IS NULL OR TRIM(video_url) = '' OR video_url = '-')";
                 }
             }
-            if (!empty($status) && in_array($status, ['registered', 'under_review', 'shortlisted', 'winner', 'rejected'], true)) {
+            if (!empty($status) && in_array($status, ['registered', 'under_review', 'shortlisted', 'winner', 'rejected', 'archived'], true)) {
                 $whereClauses[] = "status = :st";
                 $params[':st'] = $status;
             }

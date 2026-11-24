@@ -941,6 +941,172 @@ report("20. Required Fields Gate (Instagram & Reel URL)",
     ", Malformed URL blocked: " . ($invalidBlocked ? 'YES' : 'NO')
 );
 
+// -------------------------------------------------------------
+// TEST 21: Smart Duplicate Backfill on Registration (api/register.php)
+// -------------------------------------------------------------
+$codeBackfillTest = <<<'PHP'
+require_once __DIR__ . '/api/config.php';
+$pdo = getDbConnection();
+
+$testMob = '9876500111';
+$testEmail = 'backfill_contestant@internal.test';
+$pdo->exec("DELETE FROM meridian_contest_entries WHERE mobile_number = '$testMob' OR email_address = '$testEmail'");
+
+$origCode = 'M-2026-654321';
+$pdo->prepare("
+    INSERT INTO meridian_contest_entries 
+    (entry_code, full_name, mobile_number, email_address, category, video_url, city, store_code, instagram_handle, terms_agreed, status)
+    VALUES 
+    (:code, 'Pooja Kulkarni', :mob, :email, 'female', '', 'pune', 'GENERAL', '', 1, 'registered')
+")->execute([':code' => $origCode, ':mob' => $testMob, ':email' => $testEmail]);
+
+// Contestant returns to add their Reel URL and Instagram Handle!
+$_SERVER['REQUEST_METHOD'] = 'POST';
+$_SERVER['REMOTE_ADDR'] = '127.0.0.1';
+$_POST = [
+    'full_name'        => 'Pooja Kulkarni Updated',
+    'mobile_number'    => $testMob,
+    'email_address'    => $testEmail,
+    'category'         => 'female',
+    'instagram_handle' => '@pooja_creations',
+    'video_url'        => 'https://instagram.com/reel/pooja_reel_official',
+    'city'             => 'mumbai',
+    'terms_agreed'     => '1'
+];
+
+require __DIR__ . '/api/register.php';
+PHP;
+
+$resBackfill = runPhpSubprocess($codeBackfillTest);
+$backfillData = json_decode($resBackfill['stdout'], true);
+
+// Check database state
+$codeVerifyBackfill = <<<'PHP'
+require_once __DIR__ . '/api/config.php';
+$pdo = getDbConnection();
+$stmt = $pdo->prepare("SELECT * FROM meridian_contest_entries WHERE mobile_number = '9876500111'");
+$stmt->execute();
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+echo json_encode($rows);
+PHP;
+$resVerifyBackfill = runPhpSubprocess($codeVerifyBackfill);
+$backfillRows = json_decode($resVerifyBackfill['stdout'], true) ?: [];
+
+$keptOrigCode   = ($backfillData['entry_code'] ?? '') === 'M-2026-654321';
+$flaggedUpdated = ($backfillData['is_updated'] ?? false) === true;
+$rowCountIsOne  = count($backfillRows) === 1;
+$reelSaved      = ($backfillRows[0]['video_url'] ?? '') === 'https://instagram.com/reel/pooja_reel_official';
+$handleSaved    = ($backfillRows[0]['instagram_handle'] ?? '') === '@pooja_creations';
+
+$test21Pass = $keptOrigCode && $flaggedUpdated && $rowCountIsOne && $reelSaved && $handleSaved;
+
+report("21. Smart Duplicate Backfill on Submit (api/register.php)",
+    $test21Pass,
+    "Retained Ticket: " . ($keptOrigCode ? 'YES' : 'NO') .
+    ", Updated Flag: " . ($flaggedUpdated ? 'YES' : 'NO') .
+    ", Rows in DB: " . count($backfillRows) . " (No duplicate created)" .
+    ", Reel Saved: " . ($reelSaved ? 'YES' : 'NO')
+);
+
+// -------------------------------------------------------------
+// TEST 22: Smart Duplicate Sorting, Completeness & Archiving (admin/api.php)
+// -------------------------------------------------------------
+$codeDupAdminTest = <<<'PHP'
+require_once __DIR__ . '/api/config.php';
+$pdo = getDbConnection();
+
+$dupMob = '9876500222';
+$pdo->exec("DELETE FROM meridian_contest_entries WHERE mobile_number = '$dupMob'");
+
+// Insert Row 1: Incomplete (Missing Reel URL)
+$codeIncomplete = 'M-DUP-111111';
+$pdo->prepare("
+    INSERT INTO meridian_contest_entries 
+    (entry_code, full_name, mobile_number, email_address, category, video_url, city, store_code, instagram_handle, terms_agreed, status)
+    VALUES 
+    (:code, 'Sameer Khan', :mob, 'sameer.k@internal.test', 'male', '', 'pune', 'GENERAL', '', 1, 'registered')
+")->execute([':code' => $codeIncomplete, ':mob' => $dupMob]);
+
+// Insert Row 2: Complete (Has Reel URL and Instagram Handle)
+$codeComplete = 'M-DUP-222222';
+$pdo->prepare("
+    INSERT INTO meridian_contest_entries 
+    (entry_code, full_name, mobile_number, email_address, category, video_url, city, store_code, instagram_handle, terms_agreed, status)
+    VALUES 
+    (:code, 'Sameer Khan Full', :mob, 'sameer.k@internal.test', 'male', 'https://instagram.com/reel/sameer_star', 'pune', 'PUN-FC-01', '@sameer_creator', 1, 'registered')
+")->execute([':code' => $codeComplete, ':mob' => $dupMob]);
+
+session_start();
+$_SESSION['meridian_admin'] = true;
+$_SESSION['admin_user']     = 'admin';
+$_SESSION['csrf_token']     = 'test_token_123';
+$_SERVER['REQUEST_METHOD'] = 'GET';
+
+// 1. Query with sort=duplicates
+$_GET = ['action' => 'get_entries', 'sort' => 'duplicates', 'search' => $dupMob];
+ob_start();
+require __DIR__ . '/admin/api.php';
+$resSorted = json_decode(ob_get_clean(), true);
+
+echo json_encode([
+    'sorted_entries' => $resSorted['entries'] ?? []
+]);
+PHP;
+$resAdminDups = runPhpSubprocess($codeDupAdminTest);
+$adminDupsData = json_decode($resAdminDups['stdout'], true);
+$sortedEntries = $adminDupsData['entries'] ?? $adminDupsData['sorted_entries'] ?? [];
+
+$firstIsComplete = count($sortedEntries) >= 2 
+    && ($sortedEntries[0]['is_complete'] ?? false) === true
+    && ($sortedEntries[0]['entry_code'] ?? '') === 'M-DUP-222222';
+
+$secondIsIncomplete = count($sortedEntries) >= 2
+    && ($sortedEntries[1]['is_complete'] ?? true) === false
+    && ($sortedEntries[1]['is_duplicate'] ?? false) === true;
+
+// 2. Run merge_and_archive_duplicates
+$codeMergeAction = <<<'PHP'
+session_start();
+$_SESSION['meridian_admin'] = true;
+$_SESSION['admin_user']     = 'admin';
+$_SESSION['csrf_token']     = 'test_token_123';
+$_SERVER['REQUEST_METHOD'] = 'POST';
+$_SERVER['HTTP_X_CSRF_TOKEN'] = 'test_token_123';
+$_GET = ['action' => 'merge_and_archive_duplicates'];
+require __DIR__ . '/admin/api.php';
+PHP;
+$resMerge = runPhpSubprocess($codeMergeAction);
+$mergeData = json_decode($resMerge['stdout'], true);
+
+// 3. Verify status in database
+$codeVerifyArchive = <<<'PHP'
+require_once __DIR__ . '/api/config.php';
+$pdo = getDbConnection();
+$stmt = $pdo->prepare("SELECT entry_code, status, video_url FROM meridian_contest_entries WHERE mobile_number = '9876500222' ORDER BY id ASC");
+$stmt->execute();
+echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
+PHP;
+$resVerifyArchive = runPhpSubprocess($codeVerifyArchive);
+$finalRows = json_decode($resVerifyArchive['stdout'], true) ?: [];
+
+$rowMap = [];
+foreach ($finalRows as $r) {
+    $rowMap[$r['entry_code']] = $r['status'];
+}
+
+$origStayedActive = ($rowMap['M-DUP-222222'] ?? '') === 'registered';
+$dupWasArchived   = ($rowMap['M-DUP-111111'] ?? '') === 'archived';
+
+$test22Pass = $firstIsComplete && $secondIsIncomplete && ($mergeData['success'] ?? false) && $origStayedActive && $dupWasArchived;
+
+report("22. Completeness Scoring & Duplicate Auto-Archive",
+    $test22Pass,
+    "Complete First: " . ($firstIsComplete ? 'PASS' : 'FAIL') .
+    ", Incomplete Flagged: " . ($secondIsIncomplete ? 'PASS' : 'FAIL') .
+    ", Complete Active: " . ($origStayedActive ? 'YES' : 'NO') .
+    ", Incomplete Archived: " . ($dupWasArchived ? 'YES' : 'NO')
+);
+
 // Clean up test data after run
 runPhpSubprocess($codeClean);
 

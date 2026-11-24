@@ -116,7 +116,7 @@ function initDatabaseTable(PDO $pdo, string $driver)
             `store_code` VARCHAR(50) NOT NULL DEFAULT 'GENERAL',
             `instagram_handle` VARCHAR(100) NULL,
             `terms_agreed` TINYINT(1) NOT NULL DEFAULT 1,
-            `status` ENUM('registered', 'under_review', 'shortlisted', 'winner', 'rejected') NOT NULL DEFAULT 'registered',
+            `status` ENUM('registered', 'under_review', 'shortlisted', 'winner', 'rejected', 'archived') NOT NULL DEFAULT 'registered',
             `ip_address` VARCHAR(45) NULL,
             `user_agent` VARCHAR(255) NULL,
             `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -145,6 +145,11 @@ function initDatabaseTable(PDO $pdo, string $driver)
         $pdo->exec($sql);
         try {
             $pdo->exec("ALTER TABLE `meridian_contest_entries` MODIFY COLUMN `category` VARCHAR(50) NOT NULL DEFAULT 'male'");
+        } catch (\Throwable $e) {
+            // Already modified or no permission
+        }
+        try {
+            $pdo->exec("ALTER TABLE `meridian_contest_entries` MODIFY COLUMN `status` ENUM('registered', 'under_review', 'shortlisted', 'winner', 'rejected', 'archived') NOT NULL DEFAULT 'registered'");
         } catch (\Throwable $e) {
             // Already modified or no permission
         }

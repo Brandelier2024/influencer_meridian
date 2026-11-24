@@ -149,46 +149,121 @@ if (!$pdo) {
     exit;
 }
 
-// 6. Generate 6-digit Code & Insert into Database
-$insertSql = "
-INSERT INTO `meridian_contest_entries` 
-(`entry_code`, `full_name`, `mobile_number`, `email_address`, `category`, `video_url`, `city`, `store_code`, `instagram_handle`, `terms_agreed`, `ip_address`, `user_agent`)
-VALUES 
-(:entry_code, :full_name, :mobile_number, :email_address, :category, :video_url, :city, :store_code, :instagram_handle, :terms_agreed, :ip_address, :user_agent)
-";
+// 6. Check for Existing Registration & Backfill Missing Fields (Duplicate Prevention)
+$findStmt = $pdo->prepare("
+    SELECT * FROM `meridian_contest_entries` 
+    WHERE `mobile_number` = :mobile OR `email_address` = :email 
+    ORDER BY id ASC LIMIT 1
+");
+$findStmt->execute([':mobile' => $cleanMobile, ':email' => $emailAddress]);
+$existingEntry = $findStmt->fetch(PDO::FETCH_ASSOC);
 
-$stmt = $pdo->prepare($insertSql);
-
-$inserted = false;
-$entryCode = '';
+$inserted   = false;
+$isUpdated  = false;
+$entryCode  = '';
 $dbInsertId = 0;
 
-for ($attempt = 0; $attempt < 3; $attempt++) {
-    $entryCode = 'M-2026-' . random_int(100000, 999999);
-    try {
-        $stmt->execute([
-            ':entry_code' => $entryCode,
-            ':full_name' => $fullName,
-            ':mobile_number' => $cleanMobile,
-            ':email_address' => $emailAddress,
-            ':category' => $category,
-            ':video_url' => $videoUrl,
-            ':city' => $city,
-            ':store_code' => $storeCode,
-            ':instagram_handle' => $instagram,
-            ':terms_agreed' => $termsAgreed,
-            ':ip_address' => $clientIp,
-            ':user_agent' => $userAgent
-        ]);
-        $dbInsertId = $pdo->lastInsertId();
-        $inserted = true;
-        break;
-    } catch (PDOException $ex) {
-        if ($ex->getCode() == 23000 && strpos($ex->getMessage(), 'entry_code') !== false) {
-            continue; // Retry on rare unique ticket collision
+if ($existingEntry) {
+    // Existing contestant found!
+    // Check if the existing entry was missing fields, and update with the newly provided information
+    $existingReel = trim($existingEntry['video_url'] ?? '');
+    $isMissingReel = empty($existingReel) || $existingReel === '-';
+
+    $existingIg = trim($existingEntry['instagram_handle'] ?? '');
+    $isMissingIg = empty($existingIg) || $existingIg === '-';
+
+    $updateCols = [];
+    $updateParams = [':id' => (int)$existingEntry['id']];
+
+    // Backfill Reel URL if newly provided or if existing was missing
+    if (!empty($videoUrl) && ($isMissingReel || $videoUrl !== $existingReel)) {
+        $updateCols[] = "`video_url` = :video_url";
+        $updateParams[':video_url'] = $videoUrl;
+    }
+
+    // Backfill Instagram Handle if newly provided or if existing was missing
+    if (!empty($instagram) && ($isMissingIg || $instagram !== $existingIg)) {
+        $updateCols[] = "`instagram_handle` = :instagram_handle";
+        $updateParams[':instagram_handle'] = $instagram;
+    }
+
+    // Backfill Full Name if existing was shorter/incomplete
+    if (!empty($fullName) && (empty($existingEntry['full_name']) || strlen($fullName) > strlen($existingEntry['full_name']))) {
+        $updateCols[] = "`full_name` = :full_name";
+        $updateParams[':full_name'] = $fullName;
+    }
+
+    // Backfill City if existing was default 'other' or empty
+    if (!empty($city) && (empty($existingEntry['city']) || $existingEntry['city'] === 'other')) {
+        $updateCols[] = "`city` = :city";
+        $updateParams[':city'] = $city;
+    }
+
+    // Backfill Store Code if existing was 'GENERAL' and new is specific
+    if (!empty($storeCode) && $storeCode !== 'GENERAL' && ($existingEntry['store_code'] === 'GENERAL' || empty($existingEntry['store_code']))) {
+        $updateCols[] = "`store_code` = :store_code";
+        $updateParams[':store_code'] = $storeCode;
+    }
+
+    // Update category if newly specified
+    if (!empty($category) && $existingEntry['category'] !== $category) {
+        $updateCols[] = "`category` = :category";
+        $updateParams[':category'] = $category;
+    }
+
+    // If entry was previously archived as incomplete, reactivate it!
+    if ($existingEntry['status'] === 'archived') {
+        $updateCols[] = "`status` = 'registered'";
+    }
+
+    if (!empty($updateCols)) {
+        $updateSql = "UPDATE `meridian_contest_entries` SET " . implode(', ', $updateCols) . " WHERE `id` = :id";
+        $upStmt = $pdo->prepare($updateSql);
+        $upStmt->execute($updateParams);
+    }
+
+    $entryCode  = $existingEntry['entry_code'];
+    $dbInsertId = (int)$existingEntry['id'];
+    $inserted   = true;
+    $isUpdated  = true;
+} else {
+    // Brand new submission -> insert new row
+    $insertSql = "
+    INSERT INTO `meridian_contest_entries` 
+    (`entry_code`, `full_name`, `mobile_number`, `email_address`, `category`, `video_url`, `city`, `store_code`, `instagram_handle`, `terms_agreed`, `ip_address`, `user_agent`)
+    VALUES 
+    (:entry_code, :full_name, :mobile_number, :email_address, :category, :video_url, :city, :store_code, :instagram_handle, :terms_agreed, :ip_address, :user_agent)
+    ";
+
+    $stmt = $pdo->prepare($insertSql);
+
+    for ($attempt = 0; $attempt < 3; $attempt++) {
+        $entryCode = 'M-2026-' . random_int(100000, 999999);
+        try {
+            $stmt->execute([
+                ':entry_code' => $entryCode,
+                ':full_name' => $fullName,
+                ':mobile_number' => $cleanMobile,
+                ':email_address' => $emailAddress,
+                ':category' => $category,
+                ':video_url' => $videoUrl,
+                ':city' => $city,
+                ':store_code' => $storeCode,
+                ':instagram_handle' => $instagram,
+                ':terms_agreed' => $termsAgreed,
+                ':ip_address' => $clientIp,
+                ':user_agent' => $userAgent
+            ]);
+            $dbInsertId = $pdo->lastInsertId();
+            $inserted = true;
+            break;
+        } catch (PDOException $ex) {
+            if ($ex->getCode() == 23000 && strpos($ex->getMessage(), 'entry_code') !== false) {
+                continue; // Retry on rare unique ticket collision
+            }
+            error_log("Database Insert Error: " . $ex->getMessage());
+            break;
         }
-        error_log("Database Insert Error: " . $ex->getMessage());
-        break;
     }
 }
 
@@ -205,13 +280,18 @@ if ($inserted) {
         $storeCode
     );
 
+    $successMessage = $isUpdated
+        ? 'Welcome back! Your existing contestant entry (' . $entryCode . ') has been successfully updated with your details.'
+        : 'Congratulations! You are officially registered for the Meridian Brand Ambassador Contest 2026-2027.';
+
     echo json_encode([
         'success'    => true,
         'entry_id'   => substr($entryCode, -6),
         'entry_code' => $entryCode,
         'db_id'      => $dbInsertId,
+        'is_updated' => $isUpdated,
         'email_sent' => $emailSent,
-        'message'    => 'Congratulations! You are officially registered for the Meridian Brand Ambassador Contest 2026-2027.',
+        'message'    => $successMessage,
         'category'   => $category
     ]);
     exit;

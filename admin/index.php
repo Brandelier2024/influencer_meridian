@@ -455,6 +455,23 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
               </button>
             </div>
 
+            <!-- Duplicates Filter Toggle -->
+            <button onclick="toggleDuplicatesFilter()" id="btnFilterDuplicates"
+              class="h-10 px-3.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/90 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 shrink-0 shadow-2xs"
+              title="Show only duplicate contestant entries">
+              <i data-lucide="copy" class="w-4 h-4 text-amber-600"></i>
+              <span>Duplicates</span>
+              <span id="statDupBadge" class="bg-amber-200/90 text-amber-900 text-[11px] font-black px-1.5 py-0.5 rounded-full">0</span>
+            </button>
+
+            <!-- Merge & Archive Duplicates Action -->
+            <button onclick="triggerMergeAndArchiveDuplicates()" id="btnMergeArchive"
+              class="h-10 px-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200/90 rounded-xl text-xs sm:text-sm font-bold transition flex items-center justify-center gap-1.5 shrink-0 shadow-2xs"
+              title="Treat fully completed entries as Original, merge missing fields, and archive incomplete copies">
+              <i data-lucide="sparkles" class="w-4 h-4 text-emerald-600"></i>
+              <span>Merge &amp; Archive</span>
+            </button>
+
             <!-- Reset Filters Button with generous spacing -->
             <button onclick="resetAllFilters()"
               class="h-10 px-4 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs sm:text-sm font-bold border border-slate-200 transition flex items-center justify-center gap-2 shrink-0"
@@ -501,6 +518,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                 <option value="shortlisted">⭐ Shortlisted</option>
                 <option value="winner">🏆 Winner</option>
                 <option value="rejected">Rejected</option>
+                <option value="archived">📦 Archived</option>
               </select>
             </div>
 
@@ -524,6 +542,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                 class="w-full h-10 px-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm font-semibold text-slate-700 focus:outline-none focus:border-red-600 focus:bg-white cursor-pointer transition">
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
+                <option value="duplicates">👯 Group Duplicates</option>
                 <option value="name_asc">Name (A-Z)</option>
               </select>
             </div>
@@ -551,10 +570,16 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                 <option value="winner">🏆 Mark Winner</option>
                 <option value="under_review">Mark Under Review</option>
                 <option value="rejected">Mark Rejected</option>
+                <option value="archived">📦 Move to Archive</option>
               </select>
               <button onclick="applyBulkStatus()"
                 class="h-9.5 px-4 bg-[#D8232A] hover:bg-[#B3181E] text-white rounded-xl font-bold shadow-xs transition flex items-center gap-1.5">
                 <i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Apply Status
+              </button>
+
+              <button onclick="applyBulkArchive()"
+                class="h-9.5 px-3.5 bg-amber-100 hover:bg-amber-200 text-amber-900 rounded-xl font-bold transition flex items-center gap-1.5 border border-amber-300">
+                <i data-lucide="archive" class="w-3.5 h-3.5"></i> Archive Selected
               </button>
 
               <div class="h-6 w-px bg-red-200 mx-1 hidden sm:block"></div>
@@ -1012,6 +1037,9 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
             if (document.getElementById('statWithReelCount')) {
               document.getElementById('statWithReelCount').textContent = s.with_reel || 0;
             }
+            if (document.getElementById('statDupBadge')) {
+              document.getElementById('statDupBadge').textContent = s.duplicate_clusters || 0;
+            }
             if (document.getElementById('statTodayCount')) {
               document.getElementById('statTodayCount').textContent = s.today || 0;
             }
@@ -1051,6 +1079,8 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
         loadEntries(1);
       }
 
+      let filterDuplicatesActive = false;
+
       async function loadEntries(page = 1) {
         currentPage = page;
         const search = document.getElementById('searchInput').value.trim();
@@ -1059,6 +1089,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
         const status = document.getElementById('filterStatus').value;
         const city = document.getElementById('filterCity').value;
         const sort = document.getElementById('filterSort').value;
+        const duplicatesOnly = filterDuplicatesActive ? '1' : '';
 
         const tbody = document.getElementById('entriesTableBody');
         const mobileFeed = document.getElementById('entriesMobileFeed');
@@ -1082,7 +1113,8 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
             has_reel: hasReel,
             status,
             city,
-            sort
+            sort,
+            duplicates_only: duplicatesOnly
           });
 
           const res = await fetch('api.php?' + query.toString());
@@ -1108,6 +1140,24 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
         }
       }
 
+      function toggleDuplicatesFilter() {
+        filterDuplicatesActive = !filterDuplicatesActive;
+        updateDuplicatesBtnUI();
+        loadEntries(1);
+      }
+
+      function updateDuplicatesBtnUI() {
+        const btn = document.getElementById('btnFilterDuplicates');
+        if (!btn) return;
+        if (filterDuplicatesActive) {
+          btn.classList.add('bg-amber-600', 'text-white', 'border-amber-700');
+          btn.classList.remove('bg-amber-50', 'text-amber-900', 'border-amber-200/90');
+        } else {
+          btn.classList.remove('bg-amber-600', 'text-white', 'border-amber-700');
+          btn.classList.add('bg-amber-50', 'text-amber-900', 'border-amber-200/90');
+        }
+      }
+
       function resetAllFilters() {
         document.getElementById('searchInput').value = '';
         document.getElementById('clearSearchBtn').classList.add('hidden');
@@ -1118,6 +1168,8 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
         document.getElementById('filterStatus').value = '';
         document.getElementById('filterCity').value = '';
         document.getElementById('filterSort').value = 'newest';
+        filterDuplicatesActive = false;
+        updateDuplicatesBtnUI();
         loadEntries(1);
       }
 
@@ -1174,13 +1226,24 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
           'under_review': 'bg-blue-50 text-blue-700 border-blue-200',
           'shortlisted': 'bg-purple-50 text-purple-700 border-purple-200',
           'winner': 'bg-amber-100 text-amber-800 border-amber-300 font-bold',
-          'rejected': 'bg-red-50 text-red-700 border-red-200'
+          'rejected': 'bg-red-50 text-red-700 border-red-200',
+          'archived': 'bg-slate-200 text-slate-600 border-slate-300 italic font-medium'
         };
 
         entries.forEach(row => {
           const isChecked = selectedEntryIds.has(row.id);
           const currStatusStyle = statusStyles[row.status] || statusStyles['registered'];
           const validatedVideoUrl = safeUrl(row.video_url);
+
+          let dupBadge = '';
+          if (row.is_duplicate) {
+            if (row.is_complete) {
+              dupBadge = `<div class="mt-1"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold"><i data-lucide="check-circle" class="w-3 h-3"></i> Original (Complete)</span></div>`;
+            } else {
+              const missingStr = (row.missing_fields && row.missing_fields.length > 0) ? `Missing ${row.missing_fields.join(', ')}` : 'Incomplete copy';
+              dupBadge = `<div class="mt-1"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-300 text-[10px] font-bold" title="${escapeHtml(missingStr)}"><i data-lucide="copy" class="w-3 h-3"></i> Duplicate (${escapeHtml(missingStr)})</span></div>`;
+            }
+          }
 
           // 1. DESKTOP ROW
           const tr = document.createElement('tr');
@@ -1199,6 +1262,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
               <div class="text-[11px] text-slate-500 flex items-center gap-1.5 mt-0.5">
                 ${row.instagram_handle ? `<span class="text-blue-600 font-semibold">${escapeHtml(row.instagram_handle)}</span>` : '<span class="text-slate-400">No handle</span>'}
               </div>
+              ${dupBadge}
             </td>
 
             <td class="p-3.5 whitespace-nowrap">
@@ -1233,18 +1297,28 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                 <option value="shortlisted" ${row.status === 'shortlisted' ? 'selected' : ''}>⭐ Shortlisted</option>
                 <option value="winner" ${row.status === 'winner' ? 'selected' : ''}>🏆 Winner</option>
                 <option value="rejected" ${row.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                <option value="archived" ${row.status === 'archived' ? 'selected' : ''}>📦 Archived</option>
               </select>
             </td>
 
             <!-- Desktop Action Buttons: Well-spaced (gap-2.5), comfortable touch targets -->
             <td class="p-3.5 pr-6 text-right whitespace-nowrap">
-              <div class="inline-flex items-center gap-2.5">
+              <div class="inline-flex items-center gap-2">
                 <button onclick="viewDossier(${row.id})" class="w-8.5 h-8.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition flex items-center justify-center shadow-2xs" title="View Full Dossier">
                   <i data-lucide="eye" class="w-4 h-4"></i>
                 </button>
                 <button onclick="openEditModal(${row.id})" class="w-8.5 h-8.5 rounded-xl border border-blue-200 bg-blue-50/70 text-blue-600 hover:bg-blue-600 hover:text-white transition flex items-center justify-center shadow-2xs" title="Edit Contestant Record">
                   <i data-lucide="edit-3" class="w-4 h-4"></i>
                 </button>
+                ${row.status === 'archived' ? `
+                  <button onclick="restoreSingleEntry(${row.id})" class="w-8.5 h-8.5 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition flex items-center justify-center shadow-2xs" title="Restore Contestant">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                  </button>
+                ` : `
+                  <button onclick="archiveSingleEntry(${row.id})" class="w-8.5 h-8.5 rounded-xl border border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white transition flex items-center justify-center shadow-2xs" title="Archive Duplicate">
+                    <i data-lucide="archive" class="w-4 h-4"></i>
+                  </button>
+                `}
                 <button onclick="deleteSingleEntry(${row.id})" class="w-8.5 h-8.5 rounded-xl border border-red-200 bg-red-50/70 text-red-600 hover:bg-red-600 hover:text-white transition flex items-center justify-center shadow-2xs" title="Delete Contestant Record">
                   <i data-lucide="trash-2" class="w-4 h-4"></i>
                 </button>
@@ -1276,6 +1350,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                   <a href="tel:${escapeHtml(row.mobile_number || '')}" class="font-mono text-slate-700 hover:text-red-600 font-medium">${escapeHtml(row.mobile_number || '-')}</a>
                   <span>${escapeHtml(row.email_address || '-')}</span>
                 </div>
+                ${dupBadge}
                 <div class="text-xs text-slate-600 flex items-center gap-2 mt-2">
                   <span class="capitalize font-semibold text-slate-800 flex items-center"><i data-lucide="map-pin" class="w-3.5 h-3.5 inline mr-1 text-slate-400"></i>${escapeHtml(row.city || 'pune')}</span>
                   <span class="font-mono text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200">${escapeHtml(row.store_code || 'GENERAL')}</span>
@@ -1299,6 +1374,7 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
                     <option value="shortlisted" ${row.status === 'shortlisted' ? 'selected' : ''}>⭐ Shortlisted</option>
                     <option value="winner" ${row.status === 'winner' ? 'selected' : ''}>🏆 Winner</option>
                     <option value="rejected" ${row.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                    <option value="archived" ${row.status === 'archived' ? 'selected' : ''}>📦 Archived</option>
                   </select>
                 </div>
 
@@ -1439,6 +1515,72 @@ $csrfToken = htmlspecialchars($_SESSION['csrf_token'] ?? '', ENT_QUOTES, 'UTF-8'
           loadEntries(currentPage);
         } else {
           alert(data.message);
+        }
+      }
+
+      async function applyBulkArchive() {
+        if (selectedEntryIds.size === 0) return;
+        if (!confirm(`Move ${selectedEntryIds.size} selected contestant(s) to Archive?`)) return;
+
+        try {
+          const res = await fetch('api.php?action=bulk_action', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
+            body: JSON.stringify({
+              ids: Array.from(selectedEntryIds),
+              sub_action: 'archive',
+              csrf_token: CSRF_TOKEN
+            })
+          });
+          const data = await res.json();
+          if (data.success) {
+            selectedEntryIds.clear();
+            updateBulkActionBar();
+            await loadStats();
+            loadEntries(currentPage);
+          } else {
+            alert(data.message || 'Bulk archive failed');
+          }
+        } catch (err) {
+          alert('Failed to archive selected entries');
+        }
+      }
+
+      async function archiveSingleEntry(id) {
+        if (!confirm('Move this duplicate entry to Archive?')) return;
+        await updateRowStatus(id, 'archived');
+      }
+
+      async function restoreSingleEntry(id) {
+        if (!confirm('Restore this contestant from Archive?')) return;
+        await updateRowStatus(id, 'registered');
+      }
+
+      async function triggerMergeAndArchiveDuplicates() {
+        const msg = "Smart Duplicate Merge & Archive:\n\n" +
+                    "1. Identifies repeated submissions by mobile number.\n" +
+                    "2. Treats entries with all fields filled (Reel URL & Handle) as Original.\n" +
+                    "3. Backfills any missing fields into the Original entry.\n" +
+                    "4. Safely archives incomplete duplicates.\n\n" +
+                    "Would you like to run this now?";
+        if (!confirm(msg)) return;
+
+        try {
+          const res = await fetch('api.php?action=merge_and_archive_duplicates', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF_TOKEN },
+            body: JSON.stringify({ csrf_token: CSRF_TOKEN })
+          });
+          const data = await res.json();
+          if (data.success) {
+            alert(data.message);
+            await loadStats();
+            loadEntries(1);
+          } else {
+            alert(data.message || 'Operation failed');
+          }
+        } catch (err) {
+          alert('Server communication error');
         }
       }
 
